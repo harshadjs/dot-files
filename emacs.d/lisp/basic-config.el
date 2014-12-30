@@ -1,4 +1,15 @@
-;; Basic emacs configuration.
+;;; basic-config.el
+;;;
+;;; Author: Harshad Shirwadkar
+;;; Email: harshadshirwadkar@gmail.com
+;;; Last modified: Tue Dec 30 22:36:23 UTC 2014
+;;;
+;;; This file sets basic configuration parameters. Please find more details
+;;; in the code.
+;;;
+
+(setq user-full-name "Harshad Shirwadkar")
+(setq user-mail-address "harshadshirwadkar@gmail.com")
 
 ;; Toggle fullscreen
 (defun toggle-fullscreen()
@@ -124,7 +135,6 @@
       rng-nxml-auto-validate-flag nil)
 
 ;; Associate modes with file extensions
-
 (add-to-list 'auto-mode-alist '("COMMIT_EDITMSG$" . diff-mode))
 (add-to-list 'auto-mode-alist '("\\.css$" . css-mode))
 (add-to-list 'auto-mode-alist '("\\.ya?ml$" . yaml-mode))
@@ -142,7 +152,6 @@
 (setq diff-switches "-u")
 
 ;; Cosmetics
-
 (set-face-background 'vertical-border "white")
 (set-face-foreground 'vertical-border "white")
 
@@ -197,6 +206,8 @@
 
 
 (setq-default org-export-html-postamble nil)
+
+(put 'set-goal-column 'disabled nil)
 
 (provide 'basic-config)
 
