@@ -5,4 +5,7 @@ el-get
 ac-comphist.dat
 tramp
 *~
-
+emacs.d/.*
+emacs.d/elpa
+emacs.d/eshell
+emacs.d/ido.last
