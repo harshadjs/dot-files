@@ -2,6 +2,7 @@
 
 EXCLUDE=($0 README.md)
 
+## Install symlinks
 for fname in $(pwd)/*; do
 	stripped_fname=`echo ${fname##*/}`
 
@@ -19,3 +20,6 @@ for fname in $(pwd)/*; do
 	rm -rf ~/.${stripped_fname}
 	ln -s ${fname} ~/.${stripped_fname}
 done
+
+## Create ~/org directory
+mkdir -p ~/org

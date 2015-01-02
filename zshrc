@@ -113,7 +113,6 @@ function tm-new
 	TMUX=${OLD_TMUX}
 }
 
-
 function tm-music
 {
 	tmux has-session -t Music
@@ -147,10 +146,21 @@ function org
 		fi
 		name=${name// /_}
 
-		cp ~/org/template.org ~/org/$name
-		rm -f ~/org/latest.org
-		ln -s ~/org/$name ~/org/latest.org
+		cp ~/org/templateorg ~/org/$name
+		rm -f ~/org/latestorg
+		ln -s ~/org/$name ~/org/latestorg
 	fi
 
-	emacs ~/org/latest.org &
+	emacs ~/org/latestorg &
 }
+
+git_prompt() {
+	local ref=$(git symbolic-ref HEAD 2>/dev/null| cut -d'/' -f3)
+	if [ "$ref" != "" ]; then
+		echo ":($ref)"
+	fi
+	unset ref
+}
+
+
+export PS1="%U%*%u %F{cyan}%B%n %1~%f%b\$(git_prompt)%F{cyan} [%j]%B %(?.%#.%S[%?]!%s)%b%f "
