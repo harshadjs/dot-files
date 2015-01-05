@@ -80,6 +80,7 @@ export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/g
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
 alias ll='ls -lF'
 alias la='ls -A'
 alias l='ls -CF'
@@ -127,10 +128,8 @@ function tm-music
 
 str=`tmux display-message -p "#S"`
 if [ "$str" = "Music" ]; then
-	echo "harshad" > /tmp/file
 	## Entering Music session
 	str=`ps aux | grep mp3blaster | grep -v grep`
-	echo "$str" >> /tmp/file
 	if [ "$str" = "" ]; then
 		mp3blaster
 	fi
@@ -146,12 +145,12 @@ function org
 		fi
 		name=${name// /_}
 
-		cp ~/org/templateorg ~/org/$name
-		rm -f ~/org/latestorg
-		ln -s ~/org/$name ~/org/latestorg
+		cp ~/org/template.org ~/org/$name
+		rm -f ~/org/latest.org
+		ln -s ~/org/$name ~/org/latest.org
 	fi
 
-	emacs ~/org/latestorg &
+	emacs ~/org/latest.org &
 }
 
 git_prompt() {
