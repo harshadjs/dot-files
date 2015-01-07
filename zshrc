@@ -91,18 +91,25 @@ alias logoff='gnome-session-save --kill --silent'
 alias get='sudo apt-get install'
 alias enw='emacs -nw '
 
-if [ "$TMUX" = "" ]; then
-	tmux attach
-	if [ "$?" != "0" ]; then
-		tmux has-session -t work > /dev/null 2>&1
+function get_term_name
+{
+	echo `basename $(ps -f -p $(cat /proc/$(echo $$)/stat | cut -d \  -f 4) | tail -1 | sed 's/^.* //')`
+}
+
+function tm-create-or-attach
+{
+   	if [ "$TMUX" = "" ]; then
+		tmux has-session -t ${1} > /dev/null 2>&1
 		if [ "$?" != "0" ]; then
-			tmux new-session -s work
+			tmux new-session -s ${1}
 		else
-			tmux attach -t work
+			tmux attach -t ${1}
 		fi
+		exit
 	fi
-	exit
-fi
+}
+
+tm-create-or-attach $(get_term_name)
 
 function tm-new
 {
@@ -114,45 +121,6 @@ function tm-new
 	TMUX=${OLD_TMUX}
 }
 
-function tm-music
-{
-	tmux has-session -t Music
-	if [ $? -ne 0 ]; then
-		cd ~/Music/
-		tm-new
-		cd -
-	else
-		tmux switch-client -t Music
-	fi
-}
-
-str=`tmux display-message -p "#S"`
-if [ "$str" = "Music" ]; then
-	## Entering Music session
-	str=`ps aux | grep mp3blaster | grep -v grep`
-	if [ "$str" = "" ]; then
-		mp3blaster
-	fi
-fi
-
-function org
-{
-	if [ "$1" = "new" ]; then
-		if [ "$2" != "" ]; then
-			name="$2"
-		else
-			name=`date`
-		fi
-		name=${name// /_}
-
-		cp ~/org/template.org ~/org/$name
-		rm -f ~/org/latest.org
-		ln -s ~/org/$name ~/org/latest.org
-	fi
-
-	emacs ~/org/latest.org &
-}
-
 git_prompt() {
 	local ref=$(git symbolic-ref HEAD 2>/dev/null| cut -d'/' -f3)
 	if [ "$ref" != "" ]; then
@@ -160,6 +128,5 @@ git_prompt() {
 	fi
 	unset ref
 }
-
 
 export PS1="%U%*%u %F{cyan}%B%n %1~%f%b\$(git_prompt)%F{cyan} [%j]%B %(?.%#.%S[%?]!%s)%b%f "

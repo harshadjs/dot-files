@@ -8,4 +8,7 @@
     XF86AudioLowerVolume
 "amixer -c 0 set Master 0"
     XF86AudioMute
-
+"terminator"
+    Control + F12
+"tilda"
+    F12
