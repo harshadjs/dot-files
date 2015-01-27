@@ -18,6 +18,7 @@
 		xcscope
 		gotham-theme
 		markdown-mode
+		org-jekyll
 		)
   )
 

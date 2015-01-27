@@ -209,5 +209,19 @@
 
 (put 'set-goal-column 'disabled nil)
 
+(setq org-default-notes-file "~/org/planner.org")
+
+(defun make-capture-frame ()
+  "Create a new frame and run org-capture."
+  (interactive)
+  (make-frame '((name . "capture")))
+  (select-frame-by-name "capture")
+  (delete-other-windows)
+  (org-capture)
+  (delete-other-windows)
+  )
+
+(setq org-agenda-files '("~/org"))
+
 (provide 'basic-config)
 

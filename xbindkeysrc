@@ -12,3 +12,5 @@
     Control + F12
 "tilda"
     F12
+"wmctrl -s $(expr 1 - `wmctrl -d | grep "*" | cut -d " " -f1`)"
+	Mod4 + Super_L

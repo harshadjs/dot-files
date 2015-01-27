@@ -90,6 +90,9 @@ alias e='emacs'
 alias logoff='gnome-session-save --kill --silent'
 alias get='sudo apt-get install'
 alias enw='emacs -nw '
+alias org='emacs ~/org/planner.org&'
+alias orgn='emacs -nw ~/org/planner.org'
+alias note='emacs -nw --eval "(make-capture-frame) "'
 
 function get_term_name
 {
@@ -114,7 +117,11 @@ tm-create-or-attach $(get_term_name)
 function tm-new
 {
 	OLD_TMUX=${TMUX}
-	name=`basename $(pwd)`
+	if [ "$1" = "" ]; then
+		name=`basename $(pwd) | cut -d "." -f1`
+	else
+		name=$1
+	fi
 	TMUX=
 	tmux new-session -d -s ${name}
 	tmux switch-client -t ${name}
@@ -130,3 +137,8 @@ git_prompt() {
 }
 
 export PS1="%U%*%u %F{cyan}%B%n %1~%f%b\$(git_prompt)%F{cyan} [%j]%B %(?.%#.%S[%?]!%s)%b%f "
+
+## Don't allow tmux to change window name automatically
+DISABLE_AUTO_TITLE=true
+
+export PATH=$PATH:/home/harshad/.gem/ruby/2.2.0/bin
