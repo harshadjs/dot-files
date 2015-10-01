@@ -223,5 +223,8 @@
 
 (setq org-agenda-files '("~/org"))
 
+;; Configure org-mode
+(require 'org-mode-conf)
+
 (provide 'basic-config)
 
