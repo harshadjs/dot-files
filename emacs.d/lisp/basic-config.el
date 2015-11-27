@@ -41,8 +41,8 @@
 ;; Inserts 'TAB' character instead of spaces
 (setq c-default-style "linux")
 (setq-default indent-tabs-mode 1
-	      tab-width 4
-	      c-basic-offset 4)
+	      tab-width 8
+	      c-basic-offset 8)
 
 (setq-default whitespace-line-column 80) ;; limit line length
 (setq-default whitespace-style '(face lines-tail))
