@@ -79,4 +79,8 @@
 
 (define-key global-map "\C-cc" 'org-capture)
 
+(global-set-key [C-tab] 'next-buffer)
+(global-set-key [C-iso-lefttab] 'previous-buffer)
+
+
 (provide 'my-keybindings)

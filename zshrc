@@ -136,9 +136,17 @@ git_prompt() {
 	unset ref
 }
 
+##
+## Vagrant Commands
+##
+alias vssh='vagrant ssh'
+alias vup='vagrant up'
+alias vhalt='vagrant halt'
+
 export PS1="%U%*%u %F{cyan}%B%n %1~%f%b\$(git_prompt)%F{cyan} [%j]%B %(?.%#.%S[%?]!%s)%b%f "
 
 ## Don't allow tmux to change window name automatically
 DISABLE_AUTO_TITLE=true
 
 export PATH=$PATH:/home/harshad/.gem/ruby/2.2.0/bin
+
