@@ -86,7 +86,7 @@ alias la='ls -A'
 alias l='ls -CF'
 alias lal='ls -al'
 alias lc='ls *.c'
-alias e='emacs'
+alias e='/Applications/Emacs.app/Contents/MacOS/Emacs'
 alias logoff='gnome-session-save --kill --silent'
 alias get='sudo apt-get install'
 alias enw='emacs -nw '
@@ -96,7 +96,7 @@ alias note='emacs -nw --eval "(make-capture-frame) "'
 
 function get_term_name
 {
-	echo `basename $(ps -f -p $(cat /proc/$(echo $$)/stat | cut -d \  -f 4) | tail -1 | sed 's/^.* //')`
+	echo "default"
 }
 
 function tm-create-or-attach
@@ -150,3 +150,7 @@ DISABLE_AUTO_TITLE=true
 
 export PATH=$PATH:/home/harshad/.gem/ruby/2.2.0/bin
 
+if [ $SSH_TTY != "" ]; then
+    ## Things that are different for an SSH session
+    tmux set-option prefix C-q>/dev/null 2>&1
+fi
