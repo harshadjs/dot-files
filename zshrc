@@ -150,7 +150,7 @@ DISABLE_AUTO_TITLE=true
 
 export PATH=$PATH:/home/harshad/.gem/ruby/2.2.0/bin
 
-if [ $SSH_TTY != "" ]; then
+if [ "$SSH_TTY" != "" ]; then
     ## Things that are different for an SSH session
     tmux set-option prefix C-q>/dev/null 2>&1
 fi
