@@ -209,8 +209,6 @@
 
 (put 'set-goal-column 'disabled nil)
 
-(setq org-default-notes-file "~/org/planner.org")
-
 (defun make-capture-frame ()
   "Create a new frame and run org-capture."
   (interactive)
@@ -220,8 +218,6 @@
   (org-capture)
   (delete-other-windows)
   )
-
-(setq org-agenda-files '("~/org"))
 
 ;; Configure org-mode
 (require 'org-mode-conf)
