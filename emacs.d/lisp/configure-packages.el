@@ -8,9 +8,6 @@
 ;;; the required packages installed.
 ;;;
 
-;; color-themes
-(require 'gotham-theme)
-
 ;; auto-pair-mode
 (require 'autopair)
 (autopair-global-mode)
@@ -29,5 +26,21 @@
 
 ;; emamux: emacs + tmux
 (require 'emamux)
+
+
+;; Google Packages (source: go/emacs)
+(defun require-google-specific-packages ()
+  (require 'compilation-colorization) ;; colorizes output of (i)grep
+  (require 'rotate-clients)           ;; google-rotate-client
+  (require 'rotate-among-files)       ;; google-rotate-among-files
+  (require 'googlemenu)               ;; handy Google menu bar
+  (require 'p4-files)                 ;; transparent support for Perforce filesystem
+  (require 'google3)                  ;; magically set paths for compiling google3 code
+  (require 'google3-build)            ;; support for blaze builds
+  )
+
+(if (file-directory-p "/google/") '(require-google-specific-packages))
+(require-google-specific-packages)
+(require 'column-marker)
 
 (provide 'configure-packages)

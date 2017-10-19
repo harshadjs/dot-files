@@ -1,4 +1,4 @@
-;;; basic-config.el
+;; basic-config.el
 ;;;
 ;;; Author: Harshad Shirwadkar
 ;;; Email: harshadshirwadkar@gmail.com
@@ -17,7 +17,7 @@
   (set-frame-parameter nil 'fullscreen (if (frame-parameter nil 'fullscreen) nil 'fullboth)))
 
 ;; Set indentation params
-(defun config-indent-tabs(tb-width tb-count)
+(defun config-indent-config_tabs(tb-width tb-count)
   (interactive "nTab width: \nnTab Count: ")
   (setq-default tab-width tb-width)
   (setq c-basic-offset (* tb-width tb-count))
@@ -25,6 +25,9 @@
   )
 
 ;; Scroll one line at a time
+(setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
+(setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
+(setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse~
 (setq scroll-step 1)
 
 ;; Show line and column numbers on minibuffer
@@ -36,20 +39,40 @@
 
 ;; Line numbers on left side
 (autoload 'linum-mode "linum" "toggle line numbers on/off" t)
+(if (display-graphic-p)
+  (setq linum-format " %d")
+  (setq linum-format "%4d | ")
+  )
 
+(global-linum-mode 1)
+
+(global-hl-line-mode 1)
 ;;; C indentation start ---------------
-;; Inserts 'TAB' character instead of spaces
-(setq c-default-style "linux")
-(setq-default indent-tabs-mode 1
-	      tab-width 8
-	      c-basic-offset 8)
 
-(setq-default whitespace-line-column 80) ;; limit line length
-(setq-default whitespace-style '(face lines-tail))
+(defun config-indent-80andNoTrail()
+  (setq whitespace-line-column 80) ;; limit line length
+  (setq whitespace-style '(face lines-tail))
+  (add-hook 'prog-mode-hook 'whitespace-mode)
+  (setq show-trailing-whitespace t)
+  )
 
-(add-hook 'prog-mode-hook 'whitespace-mode)
+(defun config-indent-linux()
+  (setq c-default-style "linux")
+  ;; Use TABs of length of 8
+  (setq indent-tabs-mode 1
+	tab-width 8
+	c-basic-offset 8)
+  )
+(add-hook 'c-mode-hook 'config-indent-linux)
+;; (add-hook 'c-mode-hook '(lambda () (print "hello c")))
+;; a(add-hook 'c++-mode-hook '(lambda () (print "hello c++")))
+;; (add-hook 'c-mode-common-hook '(lambda () (print "hello c common")))
+(add-hook 'c-mode-common-hook 'config-indent-80andNoTrail)
+(if (file-directory-p "/google/")
+   (add-hook 'c-mode-common-hook '(lambda () (require 'google))))
 
-(setq-default show-trailing-whitespace t)
+
+;;(config-indent-linux)
 
 ;;; C indentation stop -----------------
 
@@ -95,7 +118,7 @@
 (global-font-lock-mode t)
 
 ;; Save a list of recent files visited.
-(recentf-mode 1)
+;; (recentf-mode 1)
 
 ;; Highlight matching parentheses when the point is on them.
 (show-paren-mode 1)
@@ -187,10 +210,12 @@
 ;; do not make backup files
 (setq make-backup-files nil)
 
-;(load-theme 'wombat t)
+;; load theme only if outside of terminal
+(if (display-graphic-p)
+    (load-theme 'gotham t)
+  (load-theme 'distraction-free t)
+  )
 
-(set-default-font "-unknown-Liberation Mono-normal-normal-normal-*-*-*-*-*-m-0-iso10646-1")
-(set-face-attribute 'default nil :height 140)
 
 
 (setq org-fontify-done-headline t)
@@ -222,5 +247,10 @@
 ;; Configure org-mode
 (require 'org-mode-conf)
 
-(provide 'basic-config)
+;; For CamelCase Editing
+(add-hook 'c-mode-common-hook
+          (lambda () (subword-mode 1)))
 
+
+
+(provide 'basic-config)

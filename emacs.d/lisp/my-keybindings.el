@@ -83,4 +83,7 @@
 (global-set-key [C-iso-lefttab] 'previous-buffer)
 
 
+;; ibuffer
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+
 (provide 'my-keybindings)

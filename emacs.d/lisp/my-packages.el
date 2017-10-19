@@ -19,6 +19,9 @@
 		gotham-theme
 		markdown-mode
 		org-jekyll
+		column-marker
+		dracula-theme
+		company
 		)
   )
 
@@ -26,12 +29,14 @@
   (require 'package)
   (package-initialize)
   (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
+  (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
   )
 
 (when (not package-archive-contents) (package-refresh-contents))
 
 (dolist (p packages)
   (when (not (package-installed-p p))
-	(package-install p)))
+    (package-refresh-contents)
+    (package-install p)))
 
 (provide 'my-packages)
