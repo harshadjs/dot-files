@@ -42,4 +42,8 @@
 (if (file-directory-p "/google/") '(require-google-specific-packages))
 (require 'column-marker)
 
+;; Ido vertical mode configuration
+(ido-vertical-mode)
+(setq ido-vertical-define-keys 'C-n-C-p-up-and-down)
+
 (provide 'configure-packages)

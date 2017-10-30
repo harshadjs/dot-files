@@ -22,6 +22,10 @@
 		column-marker
 		dracula-theme
 		company
+		ido-vertical-mode
+		bbdb
+		smex
+		org-mime
 		)
   )
 
