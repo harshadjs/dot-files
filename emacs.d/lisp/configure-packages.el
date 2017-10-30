@@ -40,7 +40,6 @@
   )
 
 (if (file-directory-p "/google/") '(require-google-specific-packages))
-(require-google-specific-packages)
 (require 'column-marker)
 
 (provide 'configure-packages)
