@@ -25,9 +25,6 @@
 
 ;; Custom Key Bindings
 (global-set-key (kbd "<f12>") 'org-agenda)
-(global-set-key (kbd "<f5>") 'bh/org-todo)
-(global-set-key (kbd "<S-f5>") 'bh/widen)
-(global-set-key (kbd "<f7>") 'bh/set-truncate-lines)
 (global-set-key (kbd "<f8>") 'org-cycle-agenda-files)
 (global-set-key (kbd "<f9> <f9>") 'bh/show-org-agenda)
 (global-set-key (kbd "<f9> b") 'bbdb)
@@ -88,51 +85,34 @@
   (switch-to-buffer "*scratch*"))
 
 (setq org-todo-keywords
-      (quote ((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
-              (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)" "MEETING"))))
+      (quote ((sequence "TODO(t)" "NEXT(n)" "WORKING(w)""|" "DONE(d)" "CANCELLED(c)" "SOMEDAY(s)")
+	      )))
 
 (setq org-todo-keyword-faces
       (quote (("TODO" :foreground "red" :weight bold)
+	      ("WORKING" :foreground "WHITE" :background "GREEN" :weight bold)
               ("NEXT" :foreground "blue" :weight bold)
               ("DONE" :foreground "forest green" :weight bold)
-              ("WAITING" :foreground "orange" :weight bold)
-              ("HOLD" :foreground "magenta" :weight bold)
-              ("CANCELLED" :foreground "forest green" :weight bold)
-              ("MEETING" :foreground "forest green" :weight bold))))
+	      ("CANCELLED" :foreground "gray" :weight bold)
+	      )))
 
 (setq org-use-fast-todo-selection t)
 
 (setq org-treat-S-cursor-todo-selection-as-state-change nil)
 
-(setq org-todo-state-tags-triggers
-      (quote (("CANCELLED" ("CANCELLED" . t))
-              ("WAITING" ("WAITING" . t))
-              ("HOLD" ("WAITING") ("HOLD" . t))
-              (done ("WAITING") ("HOLD"))
-              ("TODO" ("WAITING") ("CANCELLED") ("HOLD"))
-              ("NEXT" ("WAITING") ("CANCELLED") ("HOLD"))
-              ("DONE" ("WAITING") ("CANCELLED") ("HOLD")))))
-
 (setq org-directory "~/org")
-(setq org-default-notes-file "~/org/refile.org")
+(setq org-default-notes-file "~/org/scribble.org")
 
 ;; I use C-c c to start capture mode
 (global-set-key (kbd "C-c c") 'org-capture)
 
 ;; Capture templates for: TODO tasks, Notes, appointments, meetings, and org-protocol
 (setq org-capture-templates
-      (quote (("t" "todo" entry (file "~/org/refile.org")
+      (quote (("t" "todo" entry (file "~/org/scribble.org")
                "* TODO %?\n%U\n%a\n")
-              ("n" "note" entry (file "~/org/refile.org")
+              ("n" "note" entry (file "~/org/scribble.org")
                "* %? :NOTE:\n%U\n%a\n")
-              ("j" "Journal" entry (file+datetree "~/org/diary.org")
-               "* %?\n%U\n")
-              ("w" "org-protocol" entry (file "~/org/refile.org")
-               "* TODO Review %c\n%U\n" :immediate-finish t)
-              ("m" "Meeting" entry (file "~/org/refile.org")
-               "* MEETING with %? :MEETING:\n%U")
-              ("h" "Habit" entry (file "~/org/refile.org")
-               "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n"))))
+	      )))
 
 ;; Remove empty LOGBOOK drawers on clock out
 (defun bh/remove-empty-drawer-on-clock-out ()
@@ -144,11 +124,11 @@
 (add-hook 'org-clock-out-hook 'bh/remove-empty-drawer-on-clock-out 'append)
 
 ; Targets include this file and any file contributing to the agenda - up to 9 levels deep
-(setq org-refile-targets (quote ((nil :maxlevel . 9)
-                                 (org-agenda-files :maxlevel . 9))))
+(setq org-refile-targets (quote ((nil :maxlevel . 1)
+                                 (org-agenda-files :maxlevel . 1))))
 
 ; Use full outline paths for refile targets - we file directly with IDO
-(setq org-refile-use-outline-path t)
+(setq org-refile-use-outline-path 'file)
 
 ; Targets complete directly with IDO
 (setq org-outline-path-complete-in-steps nil)
@@ -184,76 +164,53 @@
 ;; Custom agenda command definitions
 (setq org-agenda-custom-commands
       (quote (("N" "Notes" tags "NOTE"
-               ((org-agenda-overriding-header "Notes")
-                (org-tags-match-list-sublevels t)))
-              ("h" "Habits" tags-todo "STYLE=\"habit\""
-               ((org-agenda-overriding-header "Habits")
-                (org-agenda-sorting-strategy
-                 '(todo-state-down effort-up category-keep))))
-              (" " "Agenda"
-               ((agenda "" nil)
-                (tags "REFILE"
-                      ((org-agenda-overriding-header "Tasks to Refile")
+	       ((org-agenda-overriding-header
+		 (concat "===============\n"
+			 " Note Pointers\n"
+			 "===============\n"))
+		(org-tags-match-list-sublevels nil)))
+	      ("s" "Pick and Finish!" tags "someday"
+               ((org-agenda-overriding-header "Pick and Finish!")
+                (org-tags-match-list-sublevels nil)))
+	      (" " "Tasks"
+	       (
+		(todo "WORKING"
+			   ((org-agenda-overriding-header
+			     (concat "================\n"
+				     " Overall Agenda\n"
+				     "================\n\n** Working on **\n"))
                        (org-tags-match-list-sublevels nil)))
-                (tags-todo "-CANCELLED/!"
-                           ((org-agenda-overriding-header "Stuck Projects")
-                            (org-agenda-skip-function 'bh/skip-non-stuck-projects)
-                            (org-agenda-sorting-strategy
-                             '(category-keep))))
-                (tags-todo "-HOLD-CANCELLED/!"
-                           ((org-agenda-overriding-header "Projects")
-                            (org-agenda-skip-function 'bh/skip-non-projects)
-                            (org-tags-match-list-sublevels 'indented)
-                            (org-agenda-sorting-strategy
-                             '(category-keep))))
-                (tags-todo "-CANCELLED/!NEXT"
-                           ((org-agenda-overriding-header (concat "Project Next Tasks"
-                                                                  (if bh/hide-scheduled-and-waiting-next-tasks
-                                                                      ""
-                                                                    " (including WAITING and SCHEDULED tasks)")))
-                            (org-agenda-skip-function 'bh/skip-projects-and-habits-and-single-tasks)
-                            (org-tags-match-list-sublevels t)
-                            (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
-                            (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)
-                            (org-agenda-todo-ignore-with-date bh/hide-scheduled-and-waiting-next-tasks)
-                            (org-agenda-sorting-strategy
-                             '(todo-state-down effort-up category-keep))))
-                (tags-todo "-REFILE-CANCELLED-WAITING-HOLD/!"
-                           ((org-agenda-overriding-header (concat "Project Subtasks"
-                                                                  (if bh/hide-scheduled-and-waiting-next-tasks
-                                                                      ""
-                                                                    " (including WAITING and SCHEDULED tasks)")))
-                            (org-agenda-skip-function 'bh/skip-non-project-tasks)
-                            (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
-                            (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)
-                            (org-agenda-todo-ignore-with-date bh/hide-scheduled-and-waiting-next-tasks)
-                            (org-agenda-sorting-strategy
-                             '(category-keep))))
-                (tags-todo "-REFILE-CANCELLED-WAITING-HOLD/!"
-                           ((org-agenda-overriding-header (concat "Standalone Tasks"
-                                                                  (if bh/hide-scheduled-and-waiting-next-tasks
-                                                                      ""
-                                                                    " (including WAITING and SCHEDULED tasks)")))
-                            (org-agenda-skip-function 'bh/skip-project-tasks)
-                            (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
-                            (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)
-                            (org-agenda-todo-ignore-with-date bh/hide-scheduled-and-waiting-next-tasks)
-                            (org-agenda-sorting-strategy
-                             '(category-keep))))
-                (tags-todo "-CANCELLED+WAITING|HOLD/!"
-                           ((org-agenda-overriding-header (concat "Waiting and Postponed Tasks"
-                                                                  (if bh/hide-scheduled-and-waiting-next-tasks
-                                                                      ""
-                                                                    " (including WAITING and SCHEDULED tasks)")))
-                            (org-agenda-skip-function 'bh/skip-non-tasks)
-                            (org-tags-match-list-sublevels nil)
-                            (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
-                            (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)))
-                (tags "-REFILE/"
-                      ((org-agenda-overriding-header "Tasks to Archive")
-                       (org-agenda-skip-function 'bh/skip-non-archivable-tasks)
-                       (org-tags-match-list-sublevels nil))))
-               nil))))
+		(todo "NEXT"
+                      ((org-agenda-overriding-header "\n** Next Items **\n")
+                       (org-tags-match-list-sublevels nil)))
+		(todo "TODO"
+                      ((org-agenda-overriding-header "\n** TODOs **\n")
+                       (org-tags-match-list-sublevels nil)))
+		(tags-todo "read/-DONE-CANCELLED"
+                      ((org-agenda-overriding-header "\n** Reading List **\n")
+                       (org-tags-match-list-sublevels nil)))
+		)
+	       )
+	      ("w" "Work"
+	       (
+		(tags-todo "work/WORKING"
+			   ((org-agenda-overriding-header
+			     (concat "=============\n"
+				     " Work Agenda\n"
+				     "=============\n\n** Working on **\n"))
+                       (org-tags-match-list-sublevels nil)))
+		(tags-todo "work/NEXT"
+                      ((org-agenda-overriding-header "\n** Next Items **\n")
+                       (org-tags-match-list-sublevels nil)))
+		(tags-todo "work/TODO"
+                      ((org-agenda-overriding-header "\n** TODOs **\n")
+                       (org-tags-match-list-sublevels nil)))
+		(tags-todo "read+work/-DONE-CANCELLED"
+                      ((org-agenda-overriding-header "\n** Reading List **\n")
+                       (org-tags-match-list-sublevels nil)))
+		)
+	       )
+	      )))
 
 (defun bh/org-auto-exclude-function (tag)
   "Automatic task exclusion in the agenda with / RET"
@@ -438,23 +395,9 @@ A prefix arg forces clock in of the default task."
 (setq org-agenda-log-mode-items (quote (closed state)))
 
 ; Tags with fast selection keys
-(setq org-tag-alist (quote ((:startgroup)
-                            ("@errand" . ?e)
-                            ("@office" . ?o)
-                            ("@home" . ?H)
-                            ("@farm" . ?f)
-                            (:endgroup)
-                            ("WAITING" . ?w)
-                            ("HOLD" . ?h)
-                            ("PERSONAL" . ?P)
-                            ("WORK" . ?W)
-                            ("FARM" . ?F)
-                            ("ORG" . ?O)
-                            ("NORANG" . ?N)
-                            ("crypt" . ?E)
+(setq org-tag-alist (quote (("read" . ?r)
                             ("NOTE" . ?n)
-                            ("CANCELLED" . ?c)
-                            ("FLAGGED" . ??))))
+			    )))
 
 ; Allow setting single tags without the menu
 (setq org-fast-tag-selection-single-key (quote expert))
@@ -724,7 +667,7 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
       next-headline)))
 
 (setq org-archive-mark-done nil)
-(setq org-archive-location "%s_archive::* Archived Tasks")
+(setq org-archive-location "archives/%s::* Archived Tasks")
 
 (defun bh/skip-non-archivable-tasks ()
   "Skip trees that are not available for archiving"
