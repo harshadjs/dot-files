@@ -110,8 +110,10 @@
 (setq org-capture-templates
       (quote (("t" "todo" entry (file "~/org/scribble.org")
                "* TODO %?\n%U\n%a\n")
-              ("n" "note" entry (file "~/org/scribble.org")
-               "* %? :NOTE:\n%U\n%a\n")
+	      ("T" "today" entry (file "~/org/scribble.org")
+               "* TODO %? :today: \n%U\n%a\n")
+	      ("n" "note" entry (file "~/org/scribble.org")
+               "* %? :note:\n%U\n%a\n")
 	      )))
 
 ;; Remove empty LOGBOOK drawers on clock out
@@ -163,49 +165,64 @@
 
 ;; Custom agenda command definitions
 (setq org-agenda-custom-commands
-      (quote (("N" "Notes" tags "NOTE"
+      (quote (("N" "Notes" tags "note"
 	       ((org-agenda-overriding-header
 		 (concat "===============\n"
 			 " Note Pointers\n"
 			 "===============\n"))
 		(org-tags-match-list-sublevels nil)))
 	      ("s" "Pick and Finish!" tags "someday"
-               ((org-agenda-overriding-header "Pick and Finish!")
+               ((org-agenda-overriding-header
+		 (concat "=================\n"
+			 " Pick and Finish\n"
+			 "=================\n"))
                 (org-tags-match-list-sublevels nil)))
 	      (" " "Tasks"
 	       (
-		(todo "WORKING"
+		(tags "today"
 			   ((org-agenda-overriding-header
-			     (concat "================\n"
+			     (concat "===============\n"
 				     " Overall Agenda\n"
-				     "================\n\n** Working on **\n"))
+				     "===============\n\n** TODAY **\n"))
+			    (org-tags-match-list-sublevels nil)
+			    (org-show-context-detail 'minimal)
+			    (org-agenda-prefix-format "")
+			    ))
+		(tags-todo "-today/WORKING"
+                      ((org-agenda-overriding-header "\n** Current items in my plate **\n")
                        (org-tags-match-list-sublevels nil)))
-		(todo "NEXT"
+		(tags-todo "-today/NEXT"
                       ((org-agenda-overriding-header "\n** Next Items **\n")
                        (org-tags-match-list-sublevels nil)))
-		(todo "TODO"
+		(tags-todo "-today/TODO"
                       ((org-agenda-overriding-header "\n** TODOs **\n")
                        (org-tags-match-list-sublevels nil)))
-		(tags-todo "read/-DONE-CANCELLED"
+		(tags-todo "-today+read/-DONE-CANCELLED"
                       ((org-agenda-overriding-header "\n** Reading List **\n")
                        (org-tags-match-list-sublevels nil)))
 		)
 	       )
 	      ("w" "Work"
 	       (
-		(tags-todo "work/WORKING"
+		(tags "today+work"
 			   ((org-agenda-overriding-header
 			     (concat "=============\n"
 				     " Work Agenda\n"
-				     "=============\n\n** Working on **\n"))
+				     "=============\n\n** TODAY **\n"))
+                       (org-tags-match-list-sublevels nil)
+		       (org-show-context-detail 'minimal)
+		       (org-agenda-prefix-format "")
+		       ))
+		(tags-todo "+work-today/WORKING"
+                      ((org-agenda-overriding-header "\n** Current items in my plate **\n")
                        (org-tags-match-list-sublevels nil)))
-		(tags-todo "work/NEXT"
+		(tags-todo "+work-today/NEXT"
                       ((org-agenda-overriding-header "\n** Next Items **\n")
                        (org-tags-match-list-sublevels nil)))
-		(tags-todo "work/TODO"
+		(tags-todo "+work-today/TODO"
                       ((org-agenda-overriding-header "\n** TODOs **\n")
                        (org-tags-match-list-sublevels nil)))
-		(tags-todo "read+work/-DONE-CANCELLED"
+		(tags-todo "+read+work-today/-DONE-CANCELLED"
                       ((org-agenda-overriding-header "\n** Reading List **\n")
                        (org-tags-match-list-sublevels nil)))
 		)
@@ -396,7 +413,8 @@ A prefix arg forces clock in of the default task."
 
 ; Tags with fast selection keys
 (setq org-tag-alist (quote (("read" . ?r)
-                            ("NOTE" . ?n)
+                            ("note" . ?n)
+                            ("today" . ?t)
 			    )))
 
 ; Allow setting single tags without the menu
