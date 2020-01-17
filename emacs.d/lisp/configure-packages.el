@@ -18,9 +18,6 @@
 (add-to-list 'ac-dictionary-directories (concat dotfiles-dir "/extensions/auto-complete/ac-dict"))
 (ac-config-default)
 
-;; etags-select: TAGS for emacs
-(require 'etags-select)
-
 ;; xcscope: Cscope for emacs
 (require 'xcscope)
 
@@ -39,8 +36,6 @@
   (require 'google3-build)            ;; support for blaze builds
   )
 
-(if (file-directory-p "/google/") '(require-google-specific-packages))
-(require 'column-marker)
 
 ;; Ido vertical mode configuration
 (ido-vertical-mode)

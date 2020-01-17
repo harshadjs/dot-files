@@ -14,12 +14,9 @@
 		auto-complete
 		autopair
 		emamux
-		etags-select
 		xcscope
 		gotham-theme
 		markdown-mode
-		org-jekyll
-		column-marker
 		dracula-theme
 		company
 		ido-vertical-mode
