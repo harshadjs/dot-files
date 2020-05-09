@@ -21,7 +21,7 @@
 ;; can override the document org-agenda-files by setting your
 ;; org-agenda-files in the variable org-user-agenda-files
 ;;
-(setq org-agenda-files (quote ("~/org")))
+(setq org-agenda-files (directory-files-recursively "~/org/" "\.org$"))
 
 ;; Custom Key Bindings
 (global-set-key (kbd "<f12>") 'org-agenda)
@@ -106,6 +106,10 @@
 ;; I use C-c c to start capture mode
 (global-set-key (kbd "C-c c") 'org-capture)
 
+(defun my/org-file-by-date ()
+  "Create an Org file with current time as name."
+  (find-file (format-time-string "~/org/journal/journal-%Y-%m-%d.org")))
+
 ;; Capture templates for: TODO tasks, Notes, appointments, meetings, and org-protocol
 (setq org-capture-templates
       (quote (("t" "todo" entry (file "~/org/scribble.org")
@@ -114,6 +118,9 @@
                "* TODO %? :today: \n%U\n%a\n")
 	      ("n" "note" entry (file "~/org/scribble.org")
                "* %? :note:\n%U\n%a\n")
+	      ("j" "journal" entry
+	       (function my/org-file-by-date)
+	       "* %U %a :journal:\n%?\n")
 	      )))
 
 ;; Remove empty LOGBOOK drawers on clock out
@@ -227,6 +234,13 @@
                        (org-tags-match-list-sublevels nil)))
 		)
 	       )
+	      ("j" "Journal" tags "journal"
+	       ((org-agenda-overriding-header
+		 (concat "===============\n"
+			 " Journal Entries\n"
+			 "===============\n"))
+		(org-tags-match-list-sublevels nil)))
+
 	      )))
 
 (defun bh/org-auto-exclude-function (tag)
