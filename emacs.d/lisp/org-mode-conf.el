@@ -118,9 +118,8 @@
                "* TODO %? :today: \n%U\n%a\n")
 	      ("n" "note" entry (file "~/org/scribble.org")
                "* %? :note:\n%U\n%a\n")
-	      ("j" "journal" entry
-	       (function my/org-file-by-date)
-	       "* %U %a :journal:\n%?\n")
+	      ("j" "journal" entry (function my/org-file-by-date)
+	       "* %U %? :journal:\n")
 	      )))
 
 ;; Remove empty LOGBOOK drawers on clock out
@@ -1476,7 +1475,6 @@ Late deadlines first, then scheduled, then non-late deadlines"
 
 (setq org-enforce-todo-dependencies t)
 
-(setq org-hide-leading-stars nil)
 
 (setq org-startup-indented t)
 
@@ -1811,6 +1809,8 @@ Late deadlines first, then scheduled, then non-late deadlines"
 (setq org-use-sub-superscripts nil)
 
 (setq org-odd-levels-only nil)
+
+(setq org-startup-indented nil)
 
 (run-at-time "00:59" 3600 'org-save-all-org-buffers)
 
