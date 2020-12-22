@@ -108,7 +108,7 @@
 
 (defun my/org-file-by-date ()
   "Create an Org file with current time as name."
-  (find-file (format-time-string "~/org/journal/journal-%Y-%m-%d.org")))
+  (find-file (format-time-string "~/org/journal/journal-%Y-%m.org")))
 
 ;; Capture templates for: TODO tasks, Notes, appointments, meetings, and org-protocol
 (setq org-capture-templates
