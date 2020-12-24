@@ -171,19 +171,7 @@
 
 ;; Custom agenda command definitions
 (setq org-agenda-custom-commands
-      (quote (("N" "Notes" tags "note"
-	       ((org-agenda-overriding-header
-		 (concat "===============\n"
-			 " Note Pointers\n"
-			 "===============\n"))
-		(org-tags-match-list-sublevels nil)))
-	      ("s" "Pick and Finish!" tags "someday"
-               ((org-agenda-overriding-header
-		 (concat "=================\n"
-			 " Pick and Finish\n"
-			 "=================\n"))
-                (org-tags-match-list-sublevels nil)))
-	      (" " "Tasks"
+      (quote (	      ("o" "Overall"
 	       (
 		(tags "today"
 			   ((org-agenda-overriding-header
@@ -203,12 +191,12 @@
 		(tags-todo "-today/TODO"
                       ((org-agenda-overriding-header "\n** TODOs **\n")
                        (org-tags-match-list-sublevels nil)))
-		(tags-todo "-today+read/-DONE-CANCELLED"
-                      ((org-agenda-overriding-header "\n** Reading List **\n")
+		(tags "+sticky"
+                      ((org-agenda-overriding-header "\n** Sticky Notes **\n")
                        (org-tags-match-list-sublevels nil)))
 		)
 	       )
-	      ("w" "Work"
+	      ("w" "Work Overall"
 	       (
 		(tags "today+work"
 			   ((org-agenda-overriding-header
@@ -228,11 +216,51 @@
 		(tags-todo "+work-today/TODO"
                       ((org-agenda-overriding-header "\n** TODOs **\n")
                        (org-tags-match-list-sublevels nil)))
-		(tags-todo "+read+work-today/-DONE-CANCELLED"
-                      ((org-agenda-overriding-header "\n** Reading List **\n")
+		(tags "+sticky+work"
+                      ((org-agenda-overriding-header "\n** Sticky Notes **\n")
                        (org-tags-match-list-sublevels nil)))
 		)
 	       )
+	      ("p" "Personal"
+	       (
+		(tags "today-work"
+			   ((org-agenda-overriding-header
+			     (concat "================\n"
+				     " Personal Agenda\n"
+				     "================\n\n** TODAY **\n"))
+                       (org-tags-match-list-sublevels nil)
+		       (org-show-context-detail 'minimal)
+		       (org-agenda-prefix-format "")
+		       ))
+		(tags-todo "-work-today/WORKING"
+                      ((org-agenda-overriding-header "\n** Current items in my plate **\n")
+                       (org-tags-match-list-sublevels nil)))
+		(tags-todo "-work-today/NEXT"
+                      ((org-agenda-overriding-header "\n** Next Items **\n")
+                       (org-tags-match-list-sublevels nil)))
+		(tags-todo "-work-today/TODO"
+                      ((org-agenda-overriding-header "\n** TODOs **\n")
+                       (org-tags-match-list-sublevels nil)))
+		(tags-todo "+read-work-today/-DONE-CANCELLED"
+                      ((org-agenda-overriding-header "\n** Reading List **\n")
+                       (org-tags-match-list-sublevels nil)))
+		(tags "+sticky-work"
+                      ((org-agenda-overriding-header "\n** Sticky Notes **\n")
+                       (org-tags-match-list-sublevels nil)))
+		)
+	       )
+	      ("N" "Notes" tags "note"
+	       ((org-agenda-overriding-header
+		 (concat "===============\n"
+			 " Note Pointers\n"
+			 "===============\n"))
+		(org-tags-match-list-sublevels nil)))
+	      ("s" "Pick and Finish!" todo "SOMEDAY"
+               ((org-agenda-overriding-header
+		 (concat "=================\n"
+			 " Pick and Finish\n"
+			 "=================\n"))
+                (org-tags-match-list-sublevels nil)))
 	      ("j" "Journal" tags "journal"
 	       ((org-agenda-overriding-header
 		 (concat "===============\n"
@@ -698,7 +726,7 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
       next-headline)))
 
 (setq org-archive-mark-done nil)
-(setq org-archive-location "archives/%s::* Archived Tasks")
+(setq org-archive-location "archives/%s-archived::* Archived Tasks")
 
 (defun bh/skip-non-archivable-tasks ()
   "Skip trees that are not available for archiving"
@@ -1751,13 +1779,9 @@ Late deadlines first, then scheduled, then non-late deadlines"
 (add-hook 'message-mode-hook 'turn-on-auto-fill 'append)
 (add-hook 'message-mode-hook 'bbdb-define-all-aliases 'append)
 (add-hook 'message-mode-hook 'orgtbl-mode 'append)
-(add-hook 'message-mode-hook 'turn-on-flyspell 'append)
 (add-hook 'message-mode-hook
           '(lambda () (setq fill-column 72))
           'append)
-
-;; flyspell mode for spell checking everywhere
-(add-hook 'org-mode-hook 'turn-on-flyspell 'append)
 
 ;; Disable keys in org-mode
 ;;    C-c [ 
