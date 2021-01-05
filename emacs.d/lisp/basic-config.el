@@ -46,7 +46,7 @@
 
 (global-linum-mode 1)
 
-(global-hl-line-mode 1)
+(global-hl-line-mode 0)
 ;;; C indentation start ---------------
 
 (defun config-indent-80andNoTrail()
@@ -212,7 +212,7 @@
 
 ;; load theme only if outside of terminal
 (if (display-graphic-p)
-    (load-theme 'gotham t)
+    (load-theme 'wombat t)
   (load-theme 'distraction-free t)
   )
 
