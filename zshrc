@@ -108,7 +108,6 @@ function tm-create-or-attach
 		else
 			tmux attach -t ${1}
 		fi
-		exit
 	fi
 }
 
