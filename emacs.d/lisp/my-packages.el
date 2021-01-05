@@ -10,7 +10,6 @@
 (defvar packages  '(
 		;;; This is the list of packages to be installed
 		;;; Add packages here
-		color-theme
 		auto-complete
 		autopair
 		emamux
