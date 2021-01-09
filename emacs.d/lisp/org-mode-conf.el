@@ -20,7 +20,7 @@
 
 
 (setq org-todo-keywords
-      (quote ((sequence "TODO(t)" "BLOCKED(b)" "NEXT(n)" "WORKING(w)" "|" "DONE(d)" "CANCELLED(c)" "SOMEDAY(s)")
+      (quote ((sequence "TODO(t)" "BLOCKED(b)" "NEXT(n)" "WORKING(w)" "SOMEDAY(s)" "|" "DONE(d)" "CANCELLED(c)")
 	      )))
 
 (setq org-todo-keyword-faces
@@ -96,18 +96,23 @@
 			    (org-agenda-span 'day)
 			    (org-deadline-warning-days 0)
 			    (org-agenda-compact-blocks nil)
-			    (org-agenda-sorting-strategy '(todo-state-down))))
+			    (org-agenda-sorting-strategy '(todo-state-down priority-down))))
 		(tags "+sticky"
                       ((org-agenda-overriding-header "\n** Sticky Notes **\n")
-                       (org-tags-match-list-sublevels t)))
+                       (org-tags-match-list-sublevels nil)))
 		(tags-todo "+work/WORKING|NEXT|TODO|BLOCKED"
                       ((org-agenda-overriding-header "\n** Work **\n")
                        (org-tags-match-list-sublevels t)
-		       (org-agenda-sorting-strategy '(todo-state-down))))
+		       (org-agenda-sorting-strategy '(todo-state-down priority-down))))
 		(tags-todo "-work/WORKING|NEXT|TODO|BLOCKED"
                       ((org-agenda-overriding-header "\n** Personal **\n")
                        (org-tags-match-list-sublevels t)
-		       (org-agenda-sorting-strategy '(todo-state-down))))
+		       (org-agenda-sorting-strategy '(todo-state-down priority-down))))
+		(tags "+project"
+                      ((org-agenda-overriding-header "\n** Projects in Motion **\n")
+                       (org-tags-match-list-sublevels nil)))
+		(stuck ""
+		       ((org-agenda-overriding-header "\n** Projects at Rest **\n")))
 		)
 	       )
 	      ("n" "Notes" tags "note"
@@ -121,7 +126,8 @@
 		 (concat "=================\n"
 			 " Pick and Finish\n"
 			 "=================\n"))
-                (org-tags-match-list-sublevels t)))
+                (org-tags-match-list-sublevels t)
+		(org-agenda-sorting-strategy '(priority-down))))
 	      ("j" "Journal" tags "journal"
 	       ((org-agenda-overriding-header
 		 (concat "===============\n"
@@ -259,9 +265,9 @@
 (setq org-agenda-restriction-lock-highlight-subtree nil)
 
 ;; Always hilight the current agenda line
-;(add-hook 'org-agenda-mode-hook
-;          '(lambda () (hl-line-mode 1))
-;          'append)
+(add-hook 'org-agenda-mode-hook
+          '(lambda () (hl-line-mode 1))
+          'append)
 
 ;; Keep tasks with dates on the global todo lists
 (setq org-agenda-todo-ignore-with-date nil)
@@ -346,6 +352,7 @@
 (setq org-id-method (quote uuidgen))
 
 (setq org-deadline-warning-days 30)
+(setq org-schedule-warning-days 30)
 
 (setq org-table-export-default-format "orgtbl-to-csv")
 
@@ -410,7 +417,7 @@
                                       ("r" . ignore)
                                       ("s" . org-save-all-org-buffers)
                                       ("w" . org-refile)
-                                      ("x" . ignore)
+                                      ("x" . hs/org-schedule-today)
                                       ("y" . ignore)
                                       ("z" . org-add-note)
 
@@ -536,5 +543,9 @@
 (setq org-startup-indented nil)
 
 (run-at-time "00:59" 3600 'org-save-all-org-buffers)
+
+(setq org-stuck-projects
+      '("+LEVEL=1+project/-DONE" ("NEXT" "TODO") ()
+        "\\<IGNORE\\>"))
 
 (provide 'org-mode-conf)
