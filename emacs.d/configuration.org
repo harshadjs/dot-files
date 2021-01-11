@@ -188,6 +188,15 @@
 
 #+END_SRC
 
+* [[https://www.emacswiki.org/emacs/WinnerMode][Winner Mode]]
+** Info
+   This mode allows me to undo the window configuration.
+** Configuration
+#+BEGIN_SRC emacs-lisp
+    (when (fboundp 'winner-mode)
+      (winner-mode 1))
+#+END_SRC
+
 * Scrolling
 #+BEGIN_SRC emacs-lisp
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
