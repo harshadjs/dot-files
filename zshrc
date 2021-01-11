@@ -147,7 +147,7 @@ export PS1="%U%*%u %F{cyan}%B%n %1~%f%b\$(git_prompt)%F{cyan} [%j]%B %(?.%#.%S[%
 ## Don't allow tmux to change window name automatically
 DISABLE_AUTO_TITLE=true
 
-export PATH=$PATH:/home/harshad/.gem/ruby/2.2.0/bin
+export PATH=$PATH:/usr/local/google/home/harshads/bin:/usr/local/google/home/harshads/.local/bin
 
 if [ "$SSH_TTY" != "" ]; then
     ## Things that are different for an SSH session
