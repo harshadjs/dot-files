@@ -7,6 +7,8 @@
   This section captures all the library functions that are defined in
   my config.
 
+** Capture Frame function
+
 #+BEGIN_SRC emacs-lisp
 (defun make-capture-frame ()
   "Create a new frame and run org-capture."
@@ -17,7 +19,11 @@
   (org-capture)
   (delete-other-windows)
   )
+#+END_SRC
 
+** C Indentation functions
+
+#+BEGIN_SRC emacs-lisp
 (defun hs/c-indent/config-indent-80andNoTrail()
   (setq whitespace-line-column 80) ;; limit line length
   (setq whitespace-style '(face lines-tail))
@@ -32,7 +38,11 @@
 	tab-width 8
 	c-basic-offset 8)
   )
+#+END_SRC
 
+** Org Mode Functions
+
+#+BEGIN_SRC emacs-lisp
 (defun hs/org-file-by-date ()
   "Create an Org file with current time as name."
   (find-file (format-time-string "~/org/journal/journal-%Y-%m.org")))
@@ -76,29 +86,19 @@
 
 #+END_SRC
 
-* Themes
-   #+BEGIN_SRC emacs-lisp
-    ;; (load-theme 'adwaita t)
-    (load-theme 'wombat t)
-   #+END_SRC
-
 * Install Packages
 ** Generic Packages
   #+BEGIN_SRC emacs-lisp
 (defvar packages  '(
-		;;; This is the list of packages to be installed
-		;;; Add packages here
 		auto-complete
 		autopair
 		xcscope
 		gotham-theme
 		markdown-mode
-		dracula-theme
 		company
 		ido-vertical-mode
-		bbdb
-		smex
 		org-mime
+		doom-themes
 		)
   )
 
@@ -129,6 +129,21 @@
   (require 'google3-build)            ;; support for blaze builds
   )
 #+END_SRC
+
+* Themes
+  I generally prefer loading dark themes. But there are times when
+  light theme makes sense. So, instead of changing config everytime,
+  just check for file existence while loading theme. Terminal is
+  always dark though.
+
+   #+BEGIN_SRC emacs-lisp
+   (if (display-graphic-p)
+       (if (file-exists-p "~/.emacs-light")
+	   (load-theme 'adwaita t)
+	   (load-theme 'wombat t))
+     (load-theme 'doom-molokai t)
+     )
+   #+END_SRC
 
 * C Indentation
 #+BEGIN_SRC emacs-lisp
@@ -188,6 +203,15 @@
 
 #+END_SRC
 
+* [[https://www.emacswiki.org/emacs/WinnerMode][Winner Mode]]
+** Info
+   This mode allows me to undo the window configuration.
+** Configuration
+#+BEGIN_SRC emacs-lisp
+    (when (fboundp 'winner-mode)
+      (winner-mode 1))
+#+END_SRC
+
 * Scrolling
 #+BEGIN_SRC emacs-lisp
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
@@ -235,7 +259,7 @@
    delete. It should work even with extensions that redefine such
    keys. It also works with YASnippet, another package I maintain.
 
-** TODO Use electric-pair mode instead of auto-pair mode
+** SOMEDAY Use electric-pair mode instead of auto-pair mode
 
 ** Configuration
 
@@ -491,70 +515,66 @@
 ;;(setq org-agenda-overriding-header "======\nAgenda\n======\n")
 (setq org-agenda-overriding-header (hs/org-style-header "This Week's Agenda"))
 ;; Compact the block agenda view
-(setq org-agenda-compact-blocks nil)
+;; (setq org-agenda-compact-blocks nil)
 
-;; Limit restriction lock highlighting to the headline only
-(setq org-agenda-restriction-lock-highlight-subtree nil)
+;; ;; Limit restriction lock highlighting to the headline only
+;; (setq org-agenda-restriction-lock-highlight-subtree nil)
 
-;; Keep tasks with dates on the global todo lists
-(setq org-agenda-todo-ignore-with-date nil)
+;; ;; Keep tasks with dates on the global todo lists
+;; (setq org-agenda-todo-ignore-with-date nil)
 
-;; Keep tasks with deadlines on the global todo lists
-(setq org-agenda-todo-ignore-deadlines nil)
+;; ;; Keep tasks with deadlines on the global todo lists
+;; (setq org-agenda-todo-ignore-deadlines nil)
 
-;; Keep tasks with scheduled dates on the global todo lists
-(setq org-agenda-todo-ignore-scheduled nil)
+;; ;; Keep tasks with scheduled dates on the global todo lists
+;; (setq org-agenda-todo-ignore-scheduled nil)
 
-;; Keep tasks with timestamps on the global todo lists
-(setq org-agenda-todo-ignore-timestamp nil)
+;; ;; Keep tasks with timestamps on the global todo lists
+;; (setq org-agenda-todo-ignore-timestamp nil)
 
-;; Remove completed deadline tasks from the agenda view
-(setq org-agenda-skip-deadline-if-done nil)
+;; ;; Remove completed deadline tasks from the agenda view
+;; (setq org-agenda-skip-deadline-if-done nil)
 
-;; Remove completed scheduled tasks from the agenda view
-(setq org-agenda-skip-scheduled-if-done t)
+;; ;; Remove completed scheduled tasks from the agenda view
+;; (setq org-agenda-skip-scheduled-if-done t)
 
-;; Remove completed items from search results
-(setq org-agenda-skip-timestamp-if-done t)
+;; ;; Remove completed items from search results
+;; (setq org-agenda-skip-timestamp-if-done t)
 
-(setq org-agenda-include-diary nil)
+;; (setq org-agenda-include-diary nil)
 
-(setq org-agenda-insert-diary-extract-time t)
+;; (setq org-agenda-insert-diary-extract-time t)
 
-;; Include agenda archive files when searching for things
-(setq org-agenda-text-search-extra-files (quote (agenda-archives)))
+;; ;; Include agenda archive files when searching for things
+;; (setq org-agenda-text-search-extra-files (quote (agenda-archives)))
 
-;; Show all future entries for repeating tasks
-(setq org-agenda-repeating-timestamp-show-all t)
+;; ;; Show all future entries for repeating tasks
+;; (setq org-agenda-repeating-timestamp-show-all t)
 
-;; Show all agenda dates - even if they are empty
-(setq org-agenda-show-all-dates t)
+;; ;; Show all agenda dates - even if they are empty
+;; (setq org-agenda-show-all-dates t)
 
-;; Sorting order for tasks on the agenda
-(setq org-agenda-sorting-strategy
-      (quote ((agenda habit-down time-up user-defined-up effort-up category-keep)
-              (todo category-up effort-up)
-              (tags category-up effort-up)
-              (search category-up))))
+(setq org-agenda-sorting-strategy '(time-up))
 
-;; Start the weekly agenda on Monday
-(setq org-agenda-start-on-weekday 1)
 
-;; Enable display of the time grid so we can see the marker for the current time
-;; (setq org-agenda-time-grid (quote ((daily today remove-match)
-;;                                    #("----------------" 0 16 (org-heading t))
-;;                                    (0900 1100 1300 1500 1700))))
+;; ;; Start the weekly agenda on Monday
+;; (setq org-agenda-start-on-weekday 1)
+
+;; ;; Enable display of the time grid so we can see the marker for the current time
+;; ;; (setq org-agenda-time-grid (quote ((daily today remove-match)
+;; ;;                                    #("----------------" 0 16 (org-heading t))
+;; ;;                                    (0900 1100 1300 1500 1700))))
 
 ;; Display tags farther right
-(setq org-agenda-tags-column -102)
+(setq org-agenda-tags-column -150)
 
-;; Use sticky agenda's so they persist
-(setq org-agenda-sticky t)
+;; ;; Use sticky agenda's so they persist
+;; (setq org-agenda-sticky t)
 
-;; Agenda log mode items to display (closed and state changes by default)
-(setq org-agenda-log-mode-items (quote (closed state)))
+;; ;; Agenda log mode items to display (closed and state changes by default)
+;; (setq org-agenda-log-mode-items (quote (closed state)))
 
-(setq org-agenda-span 'week)
+;; (setq org-agenda-span 'week)
 
 (setq org-stuck-projects (quote ("" nil nil "")))
 
@@ -608,193 +628,14 @@
 #+BEGIN_SRC emacs-lisp
 
 ; Targets include this file and any file contributing to the agenda - up to 9 levels deep
-(setq org-refile-targets (quote ((nil :maxlevel . 1)
-                                 (org-agenda-files :maxlevel . 1))))
+(setq org-refile-targets (quote ((nil :maxlevel . 2)
+                                 (org-agenda-files :maxlevel . 2))))
 
 ; Use full outline paths for refile targets - we file directly with IDO
 (setq org-refile-use-outline-path 'file)
 
 ; Allow refile to create parent tasks with confirmation
 (setq org-refile-allow-creating-parent-nodes (quote confirm))
-
-#+END_SRC
-
-** Custom Agenda Views
-
-#+BEGIN_SRC emacs-lisp
-(setq org-agenda-custom-commands
-      (quote (
-	      ("o" "Overview"
-	       (
-		(agenda "" (
-		            (org-agenda-overriding-header (concat (hs/org-style-header "Overview") (hs/org-style-sub-header "Today")))
-			    (org-agenda-span 'day)
-			    (org-deadline-warning-days 0)
-			    (org-agenda-compact-blocks nil)
-			    (org-agenda-sorting-strategy '(todo-state-down priority-down))))
-		(tags "+sticky"
-                      ((org-agenda-overriding-header (hs/org-style-sub-header "Sticky Notes"))
-		       (org-agenda-compact-blocks t)
-                       (org-tags-match-list-sublevels nil)))
-		(tags-todo "+work/WORKING|NEXT|TODO|BLOCKED"
-                      ((org-agenda-overriding-header (hs/org-style-sub-header "Work"))
-		       (org-agenda-compact-blocks t)
-                       (org-tags-match-list-sublevels t)
-		       (org-agenda-sorting-strategy '(todo-state-down priority-down))))
-		(tags-todo "-work/WORKING|NEXT|TODO|BLOCKED"
-                      ((org-agenda-overriding-header (hs/org-style-sub-header "Personal"))
-		       (org-agenda-compact-blocks t)
-                       (org-tags-match-list-sublevels t)
-		       (org-agenda-sorting-strategy '(todo-state-down priority-down))))
-		(tags "+project"
-                      ((org-agenda-overriding-header (hs/org-style-sub-header "Projects in Motion"))
-		       (org-agenda-compact-blocks t)
-                       (org-tags-match-list-sublevels nil)))
-		(stuck ""
-		       ((org-agenda-overriding-header (hs/org-style-sub-header "Projects at Rest"))
- 		        (org-agenda-compact-blocks t)
-			))
-		)
-	       )
-	      ("w" "Weekly Review"
-	       agenda ""
-	       ((org-agenda-start-day "-7d")
-                (org-agenda-span 7)
-                (org-agenda-start-on-weekday 1)
-		(org-deadline-warning-days 0)
-                (org-agenda-start-with-log-mode '(closed))
-		(org-agenda-log-mode-items (quote (closed state clock)))
-		(org-agenda-archives-mode t)
-		(org-agenda-overriding-header (hs/org-style-sub-header "Weekly Review"))
-		(org-agenda-compact-blocks nil)
-		(org-agenda-show-log t)
-		))
-	      ("n" "Notes" tags "note"
-	       ((org-agenda-overriding-header (hs/org-style-header "Note Pointers"))
-		(org-tags-match-list-sublevels t)))
-	      ("s" "Pick and Finish!" todo "SOMEDAY"
-               ((org-agenda-overriding-header (hs/org-style-header "Pick and Finish"))
-                (org-tags-match-list-sublevels t)
-		(org-agenda-sorting-strategy '(priority-down))))
-	      ("j" "Journal" tags "journal"
-	       ((org-agenda-overriding-header (hs/org-style-header "Journal Entries"))
-		(org-tags-match-list-sublevels t)))
-	      )))
-#+END_SRC
-
-** Clocking
-
-#+BEGIN_SRC emacs-lisp
-
-;; Resume clocking task when emacs is restarted
-(org-clock-persistence-insinuate)
-
-;; Separate drawers for clocking and logs
-(setq org-drawers (quote ("PROPERTIES" "LOGBOOK")))
-;; Save clock data and state changes and notes in the LOGBOOK drawer
-(setq org-clock-into-drawer t)
-;; Sometimes I change tasks I'm clocking quickly - this removes clocked tasks with 0:00 duration
-(setq org-clock-out-remove-zero-time-clocks t)
-;; Clock out when moving task to a done state
-(setq org-clock-out-when-done t)
-;; Save the running clock and all clock history when exiting Emacs, load it on startup
-(setq org-clock-persist t)
-;; Do not prompt to resume an active clock
-(setq org-clock-persist-query-resume nil)
-;; Enable auto clock resolution for finding open clocks
-(setq org-clock-auto-clock-resolution (quote when-no-clock-is-running))
-;; Include current clocking task in clock reports
-(setq org-clock-report-include-clocking-task t)
-
-(setq org-time-stamp-rounding-minutes (quote (1 1)))
-
-(setq org-agenda-clock-consistency-checks
-      (quote (:max-duration "4:00"
-              :min-duration 0
-              :max-gap 0
-              :gap-ok-around ("4:00"))))
-
-;; Sometimes I change tasks I'm clocking quickly - this removes clocked tasks with 0:00 duration
-(setq org-clock-out-remove-zero-time-clocks t)
-
-;; Agenda clock report parameters
-(setq org-agenda-clockreport-parameter-plist
-      (quote (:link t :maxlevel 5 :fileskip0 t :compact t :narrow 80)))
-
-#+END_SRC
-** Special Tags
-#+BEGIN_SRC emacs-lisp
-; Tags with fast selection keys
-(setq org-tag-alist (quote (("read" . ?r)
-                            ("note" . ?n)
-			    )))
-
-; Allow setting single tags without the menu
-(setq org-fast-tag-selection-single-key (quote expert))
-#+END_SRC
-** Archiving
-
-#+BEGIN_SRC emacs-lisp
-(setq org-archive-mark-done nil)
-(setq org-archive-location "~/org/archives/%s-archived::* Archived Tasks")
-
-(setq org-alphabetical-lists t)
-#+END_SRC
-
-** Exporting
-
-#+BEGIN_SRC emacs-lisp
-;; Explicitly load required exporters
-(require 'ox-html)
-(require 'ox-latex)
-(require 'ox-ascii)
-
-
-; Make babel results blocks lowercase
-(setq org-babel-results-keyword "results")
-
-
-(org-babel-do-load-languages
- (quote org-babel-load-languages)
- (quote ((emacs-lisp . t)
-         (dot . t)
-         (ditaa . t)
-         (R . t)
-         (python . t)
-         (ruby . t)
-         (gnuplot . t)
-         (clojure . t)
-         (shell . t)
-         (ledger . t)
-         (org . t)
-         (plantuml . t)
-         (latex . t))))
-
-; Inline images in HTML instead of producting links to the image
-(setq org-html-inline-images t)
-; Do not use sub or superscripts - I currently don't need this functionality in my documents
-(setq org-export-with-sub-superscripts nil)
-; Use org.css from the norang website for export document stylesheets
-(setq org-html-head-extra "<link rel=\"stylesheet\" href=\"http://doc.norang.ca/org.css\" type=\"text/css\" />")
-(setq org-html-head-include-default-style nil)
-; Do not generate internal css formatting for HTML exports
-(setq org-export-htmlize-output-type (quote css))
-; Export with LaTeX fragments
-(setq org-export-with-LaTeX-fragments t)
-; Increase default number of headings to export
-(setq org-export-headline-levels 6)
-
-(setq org-latex-listings t)
-
-(setq org-html-xml-declaration (quote (("html" . "")
-                                       ("was-html" . "<?xml version=\"1.0\" encoding=\"%s\"?>")
-                                       ("php" . "<?php echo \"<?xml version=\\\"1.0\\\" encoding=\\\"%s\\\" ?>\"; ?>"))))
-
-(setq org-export-allow-BIND t)
-
-;; (require 'org-checklist)
-
-(setq org-table-export-default-format "orgtbl-to-csv")
 
 #+END_SRC
 
@@ -816,8 +657,7 @@
                           org-protocol
                           org-rmail
                           org-vm
-                          org-wl
-                          org-w3m)))
+                          org-wl)))
 
 ; position the habit graph on the agenda to the right of the default
 (setq org-habit-graph-column 50)
@@ -970,6 +810,195 @@
         "\\<IGNORE\\>"))
 
 #+END_SRC
+
+** Custom Agenda Views
+
+#+BEGIN_SRC emacs-lisp
+
+(setq org-agenda-custom-commands
+      (quote (
+	      ("o" "Overview"
+	       (
+		(agenda ""
+			((org-agenda-overriding-header (concat (hs/org-style-header "Overview") (hs/org-style-sub-header "Today")))
+			    (org-agenda-span 'day)
+			    (org-agenda-compact-blocks nil)))
+		(tags "+sticky"
+                      ((org-agenda-overriding-header (hs/org-style-sub-header "Sticky Notes"))
+		       (org-agenda-compact-blocks t)
+                       (org-tags-match-list-sublevels nil)))
+		(todo "WORKING|NEXT|TODO|BLOCKED"
+                      ((org-agenda-overriding-header (hs/org-style-sub-header "Upcoming Items"))
+		       (org-agenda-compact-blocks t)
+		       (org-agenda-skip-function '(org-agenda-skip-subtree-if 'notscheduled))
+		       (org-agenda-prefix-format " %(let ((scheduled (org-get-scheduled-time (point)))) (if scheduled (format-time-string \"%d %b '%y\" scheduled) \"\")):  ")
+		       (org-agenda-sorting-strategy '(scheduled-up time-up))))
+		(todo "WORKING|NEXT|TODO|BLOCKED"
+                      ((org-agenda-overriding-header (hs/org-style-sub-header "Unscheduled Items"))
+		       (org-agenda-compact-blocks t)
+		       (org-agenda-skip-function '(org-agenda-skip-subtree-if 'scheduled))
+		       (org-agenda-sorting-strategy '(todo-state-down priority-down))))
+	       )
+	      )
+	      ("p" "Projects"
+	       (
+		(tags "+project"
+                      ((org-agenda-overriding-header
+			(concat (hs/org-style-header "Projects")
+				(hs/org-style-sub-header "Projects in Motion")))
+		       (org-agenda-compact-blocks t)
+                       (org-tags-match-list-sublevels nil)))
+		(stuck ""
+		       ((org-agenda-overriding-header (hs/org-style-sub-header "Projects at Rest"))
+ 		        (org-agenda-compact-blocks t)
+			))
+		
+		)
+	       )
+	      ("w" "Weekly Review"
+	       agenda ""
+	       ((org-agenda-start-day "-7d")
+                (org-agenda-span 7)
+                (org-agenda-start-on-weekday 1)
+		(org-deadline-warning-days 0)
+                (org-agenda-start-with-log-mode '(closed))
+		(org-agenda-log-mode-items (quote (closed state clock)))
+		(org-agenda-archives-mode t)
+		(org-agenda-overriding-header (hs/org-style-sub-header "Weekly Review"))
+		(org-agenda-compact-blocks nil)
+		(org-agenda-show-log t)
+		))
+	      ("n" "Notes" tags "note"
+	       ((org-agenda-overriding-header (hs/org-style-header "Note Pointers"))
+		(org-tags-match-list-sublevels t)))
+	      ("s" "Pick and Finish!" todo "SOMEDAY"
+               ((org-agenda-overriding-header (hs/org-style-header "Pick and Finish"))
+                (org-tags-match-list-sublevels t)
+		(org-agenda-sorting-strategy '(priority-down))))
+	      ("j" "Journal" tags "journal"
+	       ((org-agenda-overriding-header (hs/org-style-header "Journal Entries"))
+		(org-tags-match-list-sublevels t)))
+	      )))
+#+END_SRC
+
+** Clocking
+
+#+BEGIN_SRC emacs-lisp
+
+;; Resume clocking task when emacs is restarted
+(org-clock-persistence-insinuate)
+
+;; Separate drawers for clocking and logs
+(setq org-drawers (quote ("PROPERTIES" "LOGBOOK")))
+;; Save clock data and state changes and notes in the LOGBOOK drawer
+(setq org-clock-into-drawer t)
+;; Sometimes I change tasks I'm clocking quickly - this removes clocked tasks with 0:00 duration
+(setq org-clock-out-remove-zero-time-clocks t)
+;; Clock out when moving task to a done state
+(setq org-clock-out-when-done t)
+;; Save the running clock and all clock history when exiting Emacs, load it on startup
+(setq org-clock-persist t)
+;; Do not prompt to resume an active clock
+(setq org-clock-persist-query-resume nil)
+;; Enable auto clock resolution for finding open clocks
+(setq org-clock-auto-clock-resolution (quote when-no-clock-is-running))
+;; Include current clocking task in clock reports
+(setq org-clock-report-include-clocking-task t)
+
+(setq org-time-stamp-rounding-minutes (quote (1 1)))
+
+(setq org-agenda-clock-consistency-checks
+      (quote (:max-duration "4:00"
+              :min-duration 0
+              :max-gap 0
+              :gap-ok-around ("4:00"))))
+
+;; Sometimes I change tasks I'm clocking quickly - this removes clocked tasks with 0:00 duration
+(setq org-clock-out-remove-zero-time-clocks t)
+
+;; Agenda clock report parameters
+(setq org-agenda-clockreport-parameter-plist
+      (quote (:link t :maxlevel 5 :fileskip0 t :compact t :narrow 80)))
+
+#+END_SRC
+
+** Special Tags
+#+BEGIN_SRC emacs-lisp
+; Tags with fast selection keys
+(setq org-tag-alist (quote (("read" . ?r)
+                            ("note" . ?n)
+			    )))
+
+; Allow setting single tags without the menu
+(setq org-fast-tag-selection-single-key (quote expert))
+#+END_SRC
+
+** Archiving
+
+#+BEGIN_SRC emacs-lisp
+(setq org-archive-mark-done nil)
+(setq org-archive-location "~/org/archives/%s-archived::* Archived Tasks")
+
+(setq org-alphabetical-lists t)
+#+END_SRC
+
+** Exporting
+
+#+BEGIN_SRC emacs-lisp
+;; Explicitly load required exporters
+(require 'ox-html)
+(require 'ox-latex)
+(require 'ox-ascii)
+
+
+; Make babel results blocks lowercase
+(setq org-babel-results-keyword "results")
+
+
+(org-babel-do-load-languages
+ (quote org-babel-load-languages)
+ (quote ((emacs-lisp . t)
+         (dot . t)
+         (ditaa . t)
+         (R . t)
+         (python . t)
+         (ruby . t)
+         (gnuplot . t)
+         (clojure . t)
+         (shell . t)
+         (ledger . t)
+         (org . t)
+         (plantuml . t)
+         (latex . t))))
+
+; Inline images in HTML instead of producting links to the image
+(setq org-html-inline-images t)
+; Do not use sub or superscripts - I currently don't need this functionality in my documents
+(setq org-export-with-sub-superscripts nil)
+; Use org.css from the norang website for export document stylesheets
+(setq org-html-head-extra "<link rel=\"stylesheet\" href=\"http://doc.norang.ca/org.css\" type=\"text/css\" />")
+(setq org-html-head-include-default-style nil)
+; Do not generate internal css formatting for HTML exports
+(setq org-export-htmlize-output-type (quote css))
+; Export with LaTeX fragments
+(setq org-export-with-LaTeX-fragments t)
+; Increase default number of headings to export
+(setq org-export-headline-levels 6)
+
+(setq org-latex-listings t)
+
+(setq org-html-xml-declaration (quote (("html" . "")
+                                       ("was-html" . "<?xml version=\"1.0\" encoding=\"%s\"?>")
+                                       ("php" . "<?php echo \"<?xml version=\\\"1.0\\\" encoding=\\\"%s\\\" ?>\"; ?>"))))
+
+(setq org-export-allow-BIND t)
+
+;; (require 'org-checklist)
+
+(setq org-table-export-default-format "orgtbl-to-csv")
+
+#+END_SRC
+
 
 * Misc Configuration
 
