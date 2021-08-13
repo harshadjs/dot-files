@@ -2,6 +2,12 @@
 #+AUTHOR: Harshad Shirwadkar
 #+FILETAGS: config
 
+* Emacs Configuration                                         :quick:project:
+  :LOGBOOK:
+  CLOCK: [2021-08-12 Thu 10:03]
+  :END:
+  This is a project itself.
+
 * Library Functions
   
   This section captures all the library functions that are defined in
@@ -164,7 +170,7 @@
 * UI
 
 #+BEGIN_SRC emacs-lisp
-(if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+;;(if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
@@ -410,6 +416,8 @@
 
 * Keybindings
 
+** Generic Bindings
+
 #+BEGIN_SRC emacs-lisp
 ;; HS minor mode
 (global-set-key (kbd "C-c h s") 'hs-minor-mode)
@@ -430,9 +438,31 @@
 (global-set-key (kbd "C-c c") 'org-capture)
 (global-set-key (kbd "C-c a") 'org-agenda)
 (global-set-key (kbd "C-c t") 'hs/org-schedule-today)
+(global-set-key (kbd "C-c i") 'org-clock-in)
+(global-set-key (kbd "C-c o") 'org-clock-out)
 
 ;; ibuffer
 (global-set-key (kbd "C-x C-b") 'ibuffer)
+
+#+END_SRC
+
+** Simplified Bindings for Org Mode
+   Uncomment this block if you want to use simpler keybindings for
+   Org mode.
+
+#+BEGIN_SRC comment
+(setq shift-select-mode t)
+(setq org-support-shift-select t)
+
+(global-set-key (kbd "<f1>") 'ibuffer)
+(global-set-key (kbd "<f2>") 'delete-other-windows)
+(global-set-key (kbd "M-t") 'org-ctrl-c-ctrl-c)
+(global-set-key (kbd "M-s") 'org-schedule)
+(global-set-key (kbd "M-d") 'org-deadline)
+(global-set-key (kbd "M-a") 'org-agenda)
+(global-set-key (kbd "M-c") 'org-capture)
+(global-set-key (kbd "<f11>") 'org-clock-in)
+(global-set-key (kbd "<f12>") 'org-clock-out)
 
 #+END_SRC
 
@@ -441,6 +471,8 @@
 ** General Config
 #+BEGIN_SRC emacs-lisp
 (require 'org)
+
+(require 'org-mouse)
 
 (setq org-directory "~/org")
 (setq org-default-notes-file "~/org/scribble.org")
@@ -505,6 +537,11 @@
  (clock-out . "")))
 (setq org-log-into-drawer t)
 (setq org-log-state-notes-insert-after-drawers nil)
+#+END_SRC
+
+** Tags excluded from inheritance
+#+BEGIN_SRC emacs-lisp
+(setq org-tags-exclude-from-inheritance '("travel" "project"))
 #+END_SRC
 
 ** Agenda Configuration
@@ -575,8 +612,6 @@
 ;; (setq org-agenda-log-mode-items (quote (closed state)))
 
 ;; (setq org-agenda-span 'week)
-
-(setq org-stuck-projects (quote ("" nil nil "")))
 
 ;; Always hilight the current agenda line
 (add-hook 'org-agenda-mode-hook
@@ -806,7 +841,7 @@
 (run-at-time "00:59" 3600 'org-save-all-org-buffers)
 
 (setq org-stuck-projects
-      '("+LEVEL=1+project/-DONE" ("NEXT" "TODO") ()
+      '("+project/-DONE" ("NEXT" "TODO") ()
         "\\<IGNORE\\>"))
 
 #+END_SRC
@@ -833,7 +868,7 @@
 		       (org-agenda-skip-function '(org-agenda-skip-subtree-if 'notscheduled))
 		       (org-agenda-prefix-format " %(let ((scheduled (org-get-scheduled-time (point)))) (if scheduled (format-time-string \"%d %b '%y\" scheduled) \"\")):  ")
 		       (org-agenda-sorting-strategy '(scheduled-up time-up))))
-		(todo "WORKING|NEXT|TODO|BLOCKED"
+		(tags-todo "-skip_unscheduled/WORKING|NEXT|TODO|BLOCKED"
                       ((org-agenda-overriding-header (hs/org-style-sub-header "Unscheduled Items"))
 		       (org-agenda-compact-blocks t)
 		       (org-agenda-skip-function '(org-agenda-skip-subtree-if 'scheduled))
@@ -845,7 +880,7 @@
 		(tags "+project"
                       ((org-agenda-overriding-header
 			(concat (hs/org-style-header "Projects")
-				(hs/org-style-sub-header "Projects in Motion")))
+				(hs/org-style-sub-header "All Projects")))
 		       (org-agenda-compact-blocks t)
                        (org-tags-match-list-sublevels nil)))
 		(stuck ""
@@ -855,9 +890,18 @@
 		
 		)
 	       )
+	      ("z" "Meetings"
+	       (
+		(tags "+meeting"
+                      ((org-agenda-overriding-header
+			(hs/org-style-header "Meetings"))
+		       (org-agenda-compact-blocks t)
+                       (org-tags-match-list-sublevels nil)
+		       (org-agenda-prefix-format
+			"%-20(let ((scheduled (org-get-scheduled-time (point)))) (if scheduled (format-time-string \"(%B %d)\" scheduled) \"()\"))"))) ) )
 	      ("w" "Weekly Review"
 	       agenda ""
-	       ((org-agenda-start-day "-7d")
+	       (
                 (org-agenda-span 7)
                 (org-agenda-start-on-weekday 1)
 		(org-deadline-warning-days 0)
@@ -871,6 +915,9 @@
 	      ("n" "Notes" tags "note"
 	       ((org-agenda-overriding-header (hs/org-style-header "Note Pointers"))
 		(org-tags-match-list-sublevels t)))
+	      ("Q" "Quick Lookup" tags "quick"
+	       ((org-agenda-overriding-header (hs/org-style-header "Quick Lookup"))
+		(org-tags-match-list-sublevels nil)))
 	      ("s" "Pick and Finish!" todo "SOMEDAY"
                ((org-agenda-overriding-header (hs/org-style-header "Pick and Finish"))
                 (org-tags-match-list-sublevels t)
@@ -927,6 +974,10 @@
 ; Tags with fast selection keys
 (setq org-tag-alist (quote (("read" . ?r)
                             ("note" . ?n)
+			    ("quick" . ?q)
+			    ("sticky" . ?s)
+			    ("work" . ?w)
+			    ("project" . ?p)
 			    )))
 
 ; Allow setting single tags without the menu
@@ -1027,6 +1078,9 @@
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 (random t) ;; Seed the random-number generator
+
+(set-face-attribute 'default nil :height 150)
+
 #+END_SRC
 
 * Server Starting
