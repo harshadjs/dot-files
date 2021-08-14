@@ -95,32 +95,32 @@
 * Install Packages
 ** Generic Packages
   #+BEGIN_SRC emacs-lisp
-(defvar packages  '(
-		auto-complete
-		autopair
-		xcscope
-		gotham-theme
-		markdown-mode
-		company
-		ido-vertical-mode
-		org-mime
-		doom-themes
-		)
-  )
+  (defvar packages  '(
+		  auto-complete
+		  autopair
+		  xcscope
+		  gotham-theme
+		  markdown-mode
+		  company
+		  ido-vertical-mode
+		  org-mime
+		  doom-themes
+		  )
+    )
 
-(when (>= emacs-major-version 24)
-  (require 'package)
-  (package-initialize)
-  (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
-  (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
-  )
+  (when (>= emacs-major-version 24)
+    (require 'package)
+    (package-initialize)
+    (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
+    (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
+    )
 
-(when (not package-archive-contents) (package-refresh-contents))
+  (when (not package-archive-contents) (package-refresh-contents))
 
-(dolist (p packages)
-  (when (not (package-installed-p p))
-    (package-refresh-contents)
-    (package-install p)))
+  (dolist (p packages)
+    (when (not (package-installed-p p))
+      (package-refresh-contents)
+      (package-install p)))
 
 #+END_SRC
 ** Google Internal Packages
@@ -648,10 +648,10 @@
 (setq org-capture-templates
       (quote (("t" "todo" entry (file "~/org/scribble.org")
                "* TODO %?\n%U\n%a\n")
-	      ("T" "today" entry (file "~/org/scribble.org")
-               "* TODO %? \nSCHEDULED: %(org-insert-time-stamp (current-time) nil nil nil nil )\n%a\n")
 	      ("n" "note" entry (file "~/org/scribble.org")
                "* %? :note:\n%U\n%a\n")
+	      ("z" "meeting" entry (file "~/org/scribble.org")
+               "* %? :meeting:\n%U\n%a\n")
 	      ("j" "journal" entry (function hs/org-file-by-date)
 	       "* %U %? :journal:\n")
 	      )))
@@ -866,7 +866,7 @@
                       ((org-agenda-overriding-header (hs/org-style-sub-header "Upcoming Items"))
 		       (org-agenda-compact-blocks t)
 		       (org-agenda-skip-function '(org-agenda-skip-subtree-if 'notscheduled))
-		       (org-agenda-prefix-format " %(let ((scheduled (org-get-scheduled-time (point)))) (if scheduled (format-time-string \"%d %b '%y\" scheduled) \"\")):  ")
+		       (org-agenda-prefix-format " %-20(let ((scheduled (org-get-scheduled-time (point)))) (if scheduled (format-time-string \"%d %b '%y\" scheduled) \"<sub>\")):  ")
 		       (org-agenda-sorting-strategy '(scheduled-up time-up))))
 		(tags-todo "-skip_unscheduled/WORKING|NEXT|TODO|BLOCKED"
                       ((org-agenda-overriding-header (hs/org-style-sub-header "Unscheduled Items"))
@@ -897,8 +897,9 @@
 			(hs/org-style-header "Meetings"))
 		       (org-agenda-compact-blocks t)
                        (org-tags-match-list-sublevels nil)
+		       (org-agenda-sorting-strategy '(scheduled-up))
 		       (org-agenda-prefix-format
-			"%-20(let ((scheduled (org-get-scheduled-time (point)))) (if scheduled (format-time-string \"(%B %d)\" scheduled) \"()\"))"))) ) )
+			"%-20(let ((scheduled (org-get-scheduled-time (point)))) (if scheduled (format-time-string \"(%b %d %Y)\" scheduled) \"()\"))"))) ) )
 	      ("w" "Weekly Review"
 	       agenda ""
 	       (
@@ -1093,3 +1094,23 @@
 
 #+END_SRC
 
+* Prettify
+
+#+BEGIN_SRC emacs-lisp
+(add-hook 'org-mode-hook (lambda ()
+  "Beautify Org Checkbox Symbol"
+  (push '("[ ]" .  "☐") prettify-symbols-alist)
+  (push '("[X]" . "☑" ) prettify-symbols-alist)
+  (push '("[-]" . "❍" ) prettify-symbols-alist)
+  (prettify-symbols-mode)))
+
+(defface org-checkbox-done-text
+  '((t (:foreground "#71696A" :strike-through t)))
+  "Face for the text part of a checked org-mode checkbox.")
+
+(font-lock-add-keywords
+ 'org-mode
+ `(("^[ \t]*\\(?:[-+*]\\|[0-9]+[).]\\)[ \t]+\\(\\(?:\\[@\\(?:start:\\)?[0-9]+\\][ \t]*\\)?\\[\\(?:X\\|\\([0-9]+\\)/\\2\\)\\][^\n]*\n\\)"
+    1 'org-checkbox-done-text prepend))
+ 'append)
+#+END_SRC
