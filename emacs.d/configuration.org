@@ -2,11 +2,11 @@
 #+AUTHOR: Harshad Shirwadkar
 #+FILETAGS: config
 
-* Emacs Configuration                                         :quick:project:
-  :LOGBOOK:
-  CLOCK: [2021-08-12 Thu 10:03]
+* Emacs Configuration                                         :project:
+  :PROPERTIES:
+  :ID:       7DD192D8-DA31-44C2-9290-6C9CEFF5EAEE
   :END:
-  This is a project itself.
+  This is a [[id:07C51469-8108-475E-8A86-385AE8F3A94B][project]] itself.
 
 * Library Functions
   
@@ -1064,6 +1064,10 @@
 	(interactive)
      (org-roam-ui-mode)
      )
+   (defun hs/org-roam-buffer()
+	(interactive)
+     (org-roam-buffer)
+     )
    #+END_SRC
 
 * Keybindings
@@ -1093,7 +1097,8 @@
 (global-set-key (kbd "C-c i") 'org-clock-in)
 (global-set-key (kbd "C-c o") 'org-clock-out)
 (global-set-key (kbd "C-c n r") 'hs/org-refresh)
-(global-set-key (kbd "C-c n o") 'hs/org-roamify)
+(global-set-key (kbd "C-c n a") 'hs/org-roamify)
+(global-set-key (kbd "C-c n a") 'hs/org-roam-buffer)
 (global-set-key (kbd "C-c n u") 'hs/org-roam-enable-ui)
 
 
