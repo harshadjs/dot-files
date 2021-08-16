@@ -125,6 +125,9 @@
       (package-refresh-contents)
       (package-install p)))
 
+(setq create-lockfiles nil)
+
+
 #+END_SRC
 ** Google Internal Packages
 #+BEGIN_SRC emacs-lisp
@@ -414,58 +417,6 @@
 (when (eq system-type 'darwin)
   ;; Work around a bug on OS X where system-name is FQDN
   (setq system-name (car (split-string system-name "\\."))))
-
-#+END_SRC
-
-* Keybindings
-
-** Generic Bindings
-
-#+BEGIN_SRC emacs-lisp
-;; HS minor mode
-(global-set-key (kbd "C-c h s") 'hs-minor-mode)
-(global-set-key (kbd "C-c -") 'hs-hide-block)
-(global-set-key (kbd "C-c h -") 'hs-hide-all)
-(global-set-key (kbd "C-c =") 'hs-show-block)
-(global-set-key (kbd "C-c h =") 'hs-show-all)
-
-;; White-space mode
-(global-set-key (kbd "C-c W") 'whitespace-mode)
-
-;; Comment lines
-(global-set-key (kbd "C-c / /") 'comment-or-uncomment-region)
-(global-set-key (kbd "C-c / *") 'comment-region)
-(global-set-key (kbd "C-c * /") 'uncomment-region)
-
-;; Org Mode
-(global-set-key (kbd "C-c c") 'org-capture)
-(global-set-key (kbd "C-c a") 'org-agenda)
-(global-set-key (kbd "C-c t") 'hs/org-schedule-today)
-(global-set-key (kbd "C-c i") 'org-clock-in)
-(global-set-key (kbd "C-c o") 'org-clock-out)
-
-;; ibuffer
-(global-set-key (kbd "C-x C-b") 'ibuffer)
-
-#+END_SRC
-
-** Simplified Bindings for Org Mode
-   Uncomment this block if you want to use simpler keybindings for
-   Org mode.
-
-#+BEGIN_SRC comment
-(setq shift-select-mode t)
-(setq org-support-shift-select t)
-
-(global-set-key (kbd "<f1>") 'ibuffer)
-(global-set-key (kbd "<f2>") 'delete-other-windows)
-(global-set-key (kbd "M-t") 'org-ctrl-c-ctrl-c)
-(global-set-key (kbd "M-s") 'org-schedule)
-(global-set-key (kbd "M-d") 'org-deadline)
-(global-set-key (kbd "M-a") 'org-agenda)
-(global-set-key (kbd "M-c") 'org-capture)
-(global-set-key (kbd "<f11>") 'org-clock-in)
-(global-set-key (kbd "<f12>") 'org-clock-out)
 
 #+END_SRC
 
@@ -1058,12 +1009,10 @@
 ** Roam
 
 #+BEGIN_SRC emacs-lisp
-(setq org-roam-directory (file-truename "~/org/roam/"))
-
 (use-package org-roam
    :ensure t
    :custom
-   (org-roam-directory (file-truename "~/org/roam/"))
+   (org-roam-directory (file-truename "~/org/"))
    :bind (("C-c n l" . org-roam-buffer-toggle)
           ("C-c n f" . org-roam-node-find)
           ("C-c n g" . org-roam-graph)
@@ -1072,16 +1021,107 @@
           ;; Dailies
           ("C-c n j" . org-roam-dailies-capture-today))
    :config
-   (org-roam-db-autosync-mode)
    ;; If using org-roam-protocol
    (require 'org-roam-protocol))
 (setq org-roam-v2-ack t)
 (setq org-roam-graph-executable "/usr/local/bin/dot")
 
-(add-to-list 'load-path "~/.emacs.d/private/org-roam-ui")
-(load-library "org-roam-ui")
+(setq org-roam-capture-templates '(("d" "default" plain "%?"
+     :if-new (file+head "roam/%<%Y-%m-%d>-${slug}.org"
+                        "#+title: ${title}\n")
+     :unnarrowed t)))
 
 #+END_SRC
+
+** Roam UI
+   Roam UI hasn't yet made to melpa which is why I have configured it
+   as a submodule within the dot-emacs config. I should check maybe in
+   6 months or so if it has madee it to melpa and whenever it does, I
+   should remove the following block and simply use =use-package=.
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'load-path "~/.emacs.d/private/org-roam-ui")
+(load-library "org-roam-ui")
+#+END_SRC
+
+*** TODO Check if [[https://github.com/org-roam/org-roam-ui][roam ui]] has made it to melpa      :skip_unscheduled:
+    DEADLINE: <2022-02-15 Tue>
+
+** [LIB] Org Mode Library Functions
+   Custom defined function to reset org-agenda-files and also perform
+   roam db sync.
+   #+BEGIN_SRC emacs-lisp
+      (defun hs/org-refresh()
+	(interactive)
+	(setq org-agenda-files (directory-files-recursively "~/org/" "\.org$"))
+	(add-to-list 'org-agenda-files "~/.emacs.d/configuration.org")
+	(org-roam-db-sync)
+	)
+   (defun hs/org-roamify()
+	(interactive)
+     (org-id-get-create)
+     )
+   (defun hs/org-roam-enable-ui()
+	(interactive)
+     (org-roam-ui-mode)
+     )
+   #+END_SRC
+
+* Keybindings
+
+** Generic Bindings
+
+#+BEGIN_SRC emacs-lisp
+;; HS minor mode
+(global-set-key (kbd "C-c h s") 'hs-minor-mode)
+(global-set-key (kbd "C-c -") 'hs-hide-block)
+(global-set-key (kbd "C-c h -") 'hs-hide-all)
+(global-set-key (kbd "C-c =") 'hs-show-block)
+(global-set-key (kbd "C-c h =") 'hs-show-all)
+
+;; White-space mode
+(global-set-key (kbd "C-c W") 'whitespace-mode)
+
+;; Comment lines
+(global-set-key (kbd "C-c / /") 'comment-or-uncomment-region)
+(global-set-key (kbd "C-c / *") 'comment-region)
+(global-set-key (kbd "C-c * /") 'uncomment-region)
+
+;; Org Mode
+(global-set-key (kbd "C-c c") 'org-capture)
+(global-set-key (kbd "C-c a") 'org-agenda)
+(global-set-key (kbd "C-c t") 'hs/org-schedule-today)
+(global-set-key (kbd "C-c i") 'org-clock-in)
+(global-set-key (kbd "C-c o") 'org-clock-out)
+(global-set-key (kbd "C-c n r") 'hs/org-refresh)
+(global-set-key (kbd "C-c n o") 'hs/org-roamify)
+(global-set-key (kbd "C-c n u") 'hs/org-roam-enable-ui)
+
+
+;; ibuffer
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+
+#+END_SRC
+
+** Simplified Bindings for Org Mode
+   Uncomment this block if you want to use simpler keybindings for
+   Org mode.
+
+#+BEGIN_SRC comment
+(setq shift-select-mode t)
+(setq org-support-shift-select t)
+
+(global-set-key (kbd "<f1>") 'ibuffer)
+(global-set-key (kbd "<f2>") 'delete-other-windows)
+(global-set-key (kbd "M-t") 'org-ctrl-c-ctrl-c)
+(global-set-key (kbd "M-s") 'org-schedule)
+(global-set-key (kbd "M-d") 'org-deadline)
+(global-set-key (kbd "M-a") 'org-agenda)
+(global-set-key (kbd "M-c") 'org-capture)
+(global-set-key (kbd "<f11>") 'org-clock-in)
+(global-set-key (kbd "<f12>") 'org-clock-out)
+
+#+END_SRC
+
 * Misc Configuration
 
 #+BEGIN_SRC emacs-lisp
