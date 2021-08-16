@@ -9,3 +9,5 @@ emacs.d/.*
 emacs.d/elpa
 emacs.d/eshell
 emacs.d/ido.last
+emacs.d/configuration.el
+emacs.d/org-roam.db

@@ -2,6 +2,12 @@
 #+AUTHOR: Harshad Shirwadkar
 #+FILETAGS: config
 
+* Emacs Configuration                                         :project:
+  :PROPERTIES:
+  :ID:       7DD192D8-DA31-44C2-9290-6C9CEFF5EAEE
+  :END:
+  This is a [[id:07C51469-8108-475E-8A86-385AE8F3A94B][project]] itself.
+
 * Library Functions
   
   This section captures all the library functions that are defined in
@@ -89,32 +95,38 @@
 * Install Packages
 ** Generic Packages
   #+BEGIN_SRC emacs-lisp
-(defvar packages  '(
-		auto-complete
-		autopair
-		xcscope
-		gotham-theme
-		markdown-mode
-		company
-		ido-vertical-mode
-		org-mime
-		doom-themes
-		)
-  )
+  (defvar packages  '(
+		  auto-complete
+		  autopair
+		  xcscope
+		  gotham-theme
+		  markdown-mode
+		  company
+		  ido-vertical-mode
+		  org-mime
+		  doom-themes
+		  use-package
+		  websocket
+		  simple-httpd
+		  )
+    )
 
-(when (>= emacs-major-version 24)
-  (require 'package)
-  (package-initialize)
-  (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
-  (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
-  )
+  (when (>= emacs-major-version 24)
+    (require 'package)
+    (package-initialize)
+    (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
+    (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
+    )
 
-(when (not package-archive-contents) (package-refresh-contents))
+  (when (not package-archive-contents) (package-refresh-contents))
 
-(dolist (p packages)
-  (when (not (package-installed-p p))
-    (package-refresh-contents)
-    (package-install p)))
+  (dolist (p packages)
+    (when (not (package-installed-p p))
+      (package-refresh-contents)
+      (package-install p)))
+
+(setq create-lockfiles nil)
+
 
 #+END_SRC
 ** Google Internal Packages
@@ -164,7 +176,7 @@
 * UI
 
 #+BEGIN_SRC emacs-lisp
-(if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+;;(if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
@@ -408,39 +420,13 @@
 
 #+END_SRC
 
-* Keybindings
-
-#+BEGIN_SRC emacs-lisp
-;; HS minor mode
-(global-set-key (kbd "C-c h s") 'hs-minor-mode)
-(global-set-key (kbd "C-c -") 'hs-hide-block)
-(global-set-key (kbd "C-c h -") 'hs-hide-all)
-(global-set-key (kbd "C-c =") 'hs-show-block)
-(global-set-key (kbd "C-c h =") 'hs-show-all)
-
-;; White-space mode
-(global-set-key (kbd "C-c W") 'whitespace-mode)
-
-;; Comment lines
-(global-set-key (kbd "C-c / /") 'comment-or-uncomment-region)
-(global-set-key (kbd "C-c / *") 'comment-region)
-(global-set-key (kbd "C-c * /") 'uncomment-region)
-
-;; Org Mode
-(global-set-key (kbd "C-c c") 'org-capture)
-(global-set-key (kbd "C-c a") 'org-agenda)
-(global-set-key (kbd "C-c t") 'hs/org-schedule-today)
-
-;; ibuffer
-(global-set-key (kbd "C-x C-b") 'ibuffer)
-
-#+END_SRC
-
 * Org Mode Config
 
 ** General Config
 #+BEGIN_SRC emacs-lisp
 (require 'org)
+
+(require 'org-mouse)
 
 (setq org-directory "~/org")
 (setq org-default-notes-file "~/org/scribble.org")
@@ -505,6 +491,11 @@
  (clock-out . "")))
 (setq org-log-into-drawer t)
 (setq org-log-state-notes-insert-after-drawers nil)
+#+END_SRC
+
+** Tags excluded from inheritance
+#+BEGIN_SRC emacs-lisp
+(setq org-tags-exclude-from-inheritance '("travel" "project"))
 #+END_SRC
 
 ** Agenda Configuration
@@ -576,8 +567,6 @@
 
 ;; (setq org-agenda-span 'week)
 
-(setq org-stuck-projects (quote ("" nil nil "")))
-
 ;; Always hilight the current agenda line
 (add-hook 'org-agenda-mode-hook
           '(lambda ()
@@ -613,10 +602,10 @@
 (setq org-capture-templates
       (quote (("t" "todo" entry (file "~/org/scribble.org")
                "* TODO %?\n%U\n%a\n")
-	      ("T" "today" entry (file "~/org/scribble.org")
-               "* TODO %? \nSCHEDULED: %(org-insert-time-stamp (current-time) nil nil nil nil )\n%a\n")
 	      ("n" "note" entry (file "~/org/scribble.org")
                "* %? :note:\n%U\n%a\n")
+	      ("z" "meeting" entry (file "~/org/scribble.org")
+               "* %? :meeting:\n%U\n%a\n")
 	      ("j" "journal" entry (function hs/org-file-by-date)
 	       "* %U %? :journal:\n")
 	      )))
@@ -806,7 +795,7 @@
 (run-at-time "00:59" 3600 'org-save-all-org-buffers)
 
 (setq org-stuck-projects
-      '("+LEVEL=1+project/-DONE" ("NEXT" "TODO") ()
+      '("+project/-DONE" ("NEXT" "TODO") ()
         "\\<IGNORE\\>"))
 
 #+END_SRC
@@ -831,9 +820,9 @@
                       ((org-agenda-overriding-header (hs/org-style-sub-header "Upcoming Items"))
 		       (org-agenda-compact-blocks t)
 		       (org-agenda-skip-function '(org-agenda-skip-subtree-if 'notscheduled))
-		       (org-agenda-prefix-format " %(let ((scheduled (org-get-scheduled-time (point)))) (if scheduled (format-time-string \"%d %b '%y\" scheduled) \"\")):  ")
+		       (org-agenda-prefix-format " %-20(let ((scheduled (org-get-scheduled-time (point)))) (if scheduled (format-time-string \"%d %b '%y\" scheduled) \"<sub>\")):  ")
 		       (org-agenda-sorting-strategy '(scheduled-up time-up))))
-		(todo "WORKING|NEXT|TODO|BLOCKED"
+		(tags-todo "-skip_unscheduled/WORKING|NEXT|TODO|BLOCKED"
                       ((org-agenda-overriding-header (hs/org-style-sub-header "Unscheduled Items"))
 		       (org-agenda-compact-blocks t)
 		       (org-agenda-skip-function '(org-agenda-skip-subtree-if 'scheduled))
@@ -845,7 +834,7 @@
 		(tags "+project"
                       ((org-agenda-overriding-header
 			(concat (hs/org-style-header "Projects")
-				(hs/org-style-sub-header "Projects in Motion")))
+				(hs/org-style-sub-header "All Projects")))
 		       (org-agenda-compact-blocks t)
                        (org-tags-match-list-sublevels nil)))
 		(stuck ""
@@ -855,9 +844,19 @@
 		
 		)
 	       )
+	      ("z" "Meetings"
+	       (
+		(tags "+meeting"
+                      ((org-agenda-overriding-header
+			(hs/org-style-header "Meetings"))
+		       (org-agenda-compact-blocks t)
+                       (org-tags-match-list-sublevels nil)
+		       (org-agenda-sorting-strategy '(scheduled-up))
+		       (org-agenda-prefix-format
+			"%-20(let ((scheduled (org-get-scheduled-time (point)))) (if scheduled (format-time-string \"(%b %d %Y)\" scheduled) \"()\"))"))) ) )
 	      ("w" "Weekly Review"
 	       agenda ""
-	       ((org-agenda-start-day "-7d")
+	       (
                 (org-agenda-span 7)
                 (org-agenda-start-on-weekday 1)
 		(org-deadline-warning-days 0)
@@ -871,6 +870,9 @@
 	      ("n" "Notes" tags "note"
 	       ((org-agenda-overriding-header (hs/org-style-header "Note Pointers"))
 		(org-tags-match-list-sublevels t)))
+	      ("Q" "Quick Lookup" tags "quick"
+	       ((org-agenda-overriding-header (hs/org-style-header "Quick Lookup"))
+		(org-tags-match-list-sublevels nil)))
 	      ("s" "Pick and Finish!" todo "SOMEDAY"
                ((org-agenda-overriding-header (hs/org-style-header "Pick and Finish"))
                 (org-tags-match-list-sublevels t)
@@ -927,6 +929,10 @@
 ; Tags with fast selection keys
 (setq org-tag-alist (quote (("read" . ?r)
                             ("note" . ?n)
+			    ("quick" . ?q)
+			    ("sticky" . ?s)
+			    ("work" . ?w)
+			    ("project" . ?p)
 			    )))
 
 ; Allow setting single tags without the menu
@@ -1000,6 +1006,127 @@
 #+END_SRC
 
 
+** Roam
+
+#+BEGIN_SRC emacs-lisp
+(use-package org-roam
+   :ensure t
+   :custom
+   (org-roam-directory (file-truename "~/org/"))
+   :bind (("C-c n l" . org-roam-buffer-toggle)
+          ("C-c n f" . org-roam-node-find)
+          ("C-c n g" . org-roam-graph)
+          ("C-c n i" . org-roam-node-insert)
+          ("C-c n c" . org-roam-capture)
+          ;; Dailies
+          ("C-c n j" . org-roam-dailies-capture-today))
+   :config
+   ;; If using org-roam-protocol
+   (require 'org-roam-protocol))
+(setq org-roam-v2-ack t)
+(setq org-roam-graph-executable "/usr/local/bin/dot")
+
+(setq org-roam-capture-templates '(("d" "default" plain "%?"
+     :if-new (file+head "roam/%<%Y-%m-%d>-${slug}.org"
+                        "#+title: ${title}\n")
+     :unnarrowed t)))
+
+#+END_SRC
+
+** Roam UI
+   Roam UI hasn't yet made to melpa which is why I have configured it
+   as a submodule within the dot-emacs config. I should check maybe in
+   6 months or so if it has madee it to melpa and whenever it does, I
+   should remove the following block and simply use =use-package=.
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'load-path "~/.emacs.d/private/org-roam-ui")
+(load-library "org-roam-ui")
+#+END_SRC
+
+*** TODO Check if [[https://github.com/org-roam/org-roam-ui][roam ui]] has made it to melpa      :skip_unscheduled:
+    DEADLINE: <2022-02-15 Tue>
+
+** [LIB] Org Mode Library Functions
+   Custom defined function to reset org-agenda-files and also perform
+   roam db sync.
+   #+BEGIN_SRC emacs-lisp
+      (defun hs/org-refresh()
+	(interactive)
+	(setq org-agenda-files (directory-files-recursively "~/org/" "\.org$"))
+	(add-to-list 'org-agenda-files "~/.emacs.d/configuration.org")
+	(org-roam-db-sync)
+	)
+   (defun hs/org-roamify()
+	(interactive)
+     (org-id-get-create)
+     )
+   (defun hs/org-roam-enable-ui()
+	(interactive)
+     (org-roam-ui-mode)
+     )
+   (defun hs/org-roam-buffer()
+	(interactive)
+     (org-roam-buffer)
+     )
+   #+END_SRC
+
+* Keybindings
+
+** Generic Bindings
+
+#+BEGIN_SRC emacs-lisp
+;; HS minor mode
+(global-set-key (kbd "C-c h s") 'hs-minor-mode)
+(global-set-key (kbd "C-c -") 'hs-hide-block)
+(global-set-key (kbd "C-c h -") 'hs-hide-all)
+(global-set-key (kbd "C-c =") 'hs-show-block)
+(global-set-key (kbd "C-c h =") 'hs-show-all)
+
+;; White-space mode
+(global-set-key (kbd "C-c W") 'whitespace-mode)
+
+;; Comment lines
+(global-set-key (kbd "C-c / /") 'comment-or-uncomment-region)
+(global-set-key (kbd "C-c / *") 'comment-region)
+(global-set-key (kbd "C-c * /") 'uncomment-region)
+
+;; Org Mode
+(global-set-key (kbd "C-c c") 'org-capture)
+(global-set-key (kbd "C-c a") 'org-agenda)
+(global-set-key (kbd "C-c t") 'hs/org-schedule-today)
+(global-set-key (kbd "C-c i") 'org-clock-in)
+(global-set-key (kbd "C-c o") 'org-clock-out)
+(global-set-key (kbd "C-c n r") 'hs/org-refresh)
+(global-set-key (kbd "C-c n a") 'hs/org-roamify)
+(global-set-key (kbd "C-c n a") 'hs/org-roam-buffer)
+(global-set-key (kbd "C-c n u") 'hs/org-roam-enable-ui)
+
+
+;; ibuffer
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+
+#+END_SRC
+
+** Simplified Bindings for Org Mode
+   Uncomment this block if you want to use simpler keybindings for
+   Org mode.
+
+#+BEGIN_SRC comment
+(setq shift-select-mode t)
+(setq org-support-shift-select t)
+
+(global-set-key (kbd "<f1>") 'ibuffer)
+(global-set-key (kbd "<f2>") 'delete-other-windows)
+(global-set-key (kbd "M-t") 'org-ctrl-c-ctrl-c)
+(global-set-key (kbd "M-s") 'org-schedule)
+(global-set-key (kbd "M-d") 'org-deadline)
+(global-set-key (kbd "M-a") 'org-agenda)
+(global-set-key (kbd "M-c") 'org-capture)
+(global-set-key (kbd "<f11>") 'org-clock-in)
+(global-set-key (kbd "<f12>") 'org-clock-out)
+
+#+END_SRC
+
 * Misc Configuration
 
 #+BEGIN_SRC emacs-lisp
@@ -1027,6 +1154,9 @@
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 (random t) ;; Seed the random-number generator
+
+(set-face-attribute 'default nil :height 150)
+
 #+END_SRC
 
 * Server Starting
@@ -1039,3 +1169,23 @@
 
 #+END_SRC
 
+* Prettify
+
+#+BEGIN_SRC emacs-lisp
+(add-hook 'org-mode-hook (lambda ()
+  "Beautify Org Checkbox Symbol"
+  (push '("[ ]" .  "☐") prettify-symbols-alist)
+  (push '("[X]" . "☑" ) prettify-symbols-alist)
+  (push '("[-]" . "❍" ) prettify-symbols-alist)
+  (prettify-symbols-mode)))
+
+(defface org-checkbox-done-text
+  '((t (:foreground "#71696A" :strike-through t)))
+  "Face for the text part of a checked org-mode checkbox.")
+
+(font-lock-add-keywords
+ 'org-mode
+ `(("^[ \t]*\\(?:[-+*]\\|[0-9]+[).]\\)[ \t]+\\(\\(?:\\[@\\(?:start:\\)?[0-9]+\\][ \t]*\\)?\\[\\(?:X\\|\\([0-9]+\\)/\\2\\)\\][^\n]*\n\\)"
+    1 'org-checkbox-done-text prepend))
+ 'append)
+#+END_SRC
