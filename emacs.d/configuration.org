@@ -51,7 +51,7 @@
 #+BEGIN_SRC emacs-lisp
 (defun hs/org-file-by-date ()
   "Create an Org file with current time as name."
-  (find-file (format-time-string "~/org/journal/journal-%Y-%m.org")))
+  (find-file (format-time-string "~/mind/journal/journal-%Y-%m.org")))
 
 (defun hs/org-schedule-today ()
   "Schedule the current task to today."
@@ -428,8 +428,8 @@
 
 (require 'org-mouse)
 
-(setq org-directory "~/org")
-(setq org-default-notes-file "~/org/scribble.org")
+(setq org-directory "~/mind")
+(setq org-default-notes-file "~/mind/org/scribble.org")
 (setq org-use-fast-todo-selection t)
 (setq org-treat-S-cursor-todo-selection-as-state-change nil)
 (setq org-fontify-done-headline t)
@@ -500,7 +500,7 @@
 
 ** Agenda Configuration
 #+BEGIN_SRC emacs-lisp
-(setq org-agenda-files (directory-files-recursively "~/org/" "\.org$"))
+(setq org-agenda-files (directory-files-recursively "~/mind" "\.org$"))
 (add-to-list 'org-agenda-files "~/.emacs.d/configuration.org")
 
 ;;(setq org-agenda-overriding-header "======\nAgenda\n======\n")
@@ -600,11 +600,11 @@
 #+BEGIN_SRC emacs-lisp
 ;; Capture templates for: TODO tasks, Notes, appointments, meetings, and org-protocol
 (setq org-capture-templates
-      (quote (("t" "todo" entry (file "~/org/scribble.org")
+      (quote (("t" "todo" entry (file "~/mind/org/scribble.org")
                "* TODO %?\n%U\n%a\n")
-	      ("n" "note" entry (file "~/org/scribble.org")
+	      ("n" "note" entry (file "~/mind/org/scribble.org")
                "* %? :note:\n%U\n%a\n")
-	      ("z" "meeting" entry (file "~/org/scribble.org")
+	      ("z" "meeting" entry (file "~/mind/org/scribble.org")
                "* %? :meeting:\n%U\n%a\n")
 	      ("j" "journal" entry (function hs/org-file-by-date)
 	       "* %U %? :journal:\n")
@@ -943,7 +943,7 @@
 
 #+BEGIN_SRC emacs-lisp
 (setq org-archive-mark-done nil)
-(setq org-archive-location "~/org/archives/%s-archived::* Archived Tasks")
+(setq org-archive-location "~/mind/archives/%s-archived::* Archived Tasks")
 
 (setq org-alphabetical-lists t)
 #+END_SRC
@@ -1012,7 +1012,7 @@
 (use-package org-roam
    :ensure t
    :custom
-   (org-roam-directory (file-truename "~/org/"))
+   (org-roam-directory (file-truename "~/mind/"))
    :bind (("C-c n l" . org-roam-buffer-toggle)
           ("C-c n f" . org-roam-node-find)
           ("C-c n g" . org-roam-graph)
@@ -1052,7 +1052,7 @@
    #+BEGIN_SRC emacs-lisp
       (defun hs/org-refresh()
 	(interactive)
-	(setq org-agenda-files (directory-files-recursively "~/org/" "\.org$"))
+	(setq org-agenda-files (directory-files-recursively "~/mind/" "\.org$"))
 	(add-to-list 'org-agenda-files "~/.emacs.d/configuration.org")
 	(org-roam-db-sync)
 	)
