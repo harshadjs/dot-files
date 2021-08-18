@@ -500,7 +500,12 @@
 
 ** Agenda Configuration
 #+BEGIN_SRC emacs-lisp
-(setq org-agenda-files (directory-files-recursively "~/mind" "\.org$"))
+(setq org-agenda-files (append (directory-files-recursively "~/mind/org" "\.org$")
+			       (directory-files-recursively "~/mind/journal" "\.org$")
+			       (directory-files-recursively "~/mind/web/content/" "\.org$")
+			       (directory-files-recursively "~/mind/pin/" "\.org$")
+			       )
+      )
 (add-to-list 'org-agenda-files "~/.emacs.d/configuration.org")
 
 ;;(setq org-agenda-overriding-header "======\nAgenda\n======\n")
