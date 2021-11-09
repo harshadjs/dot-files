@@ -4,3 +4,6 @@
 [submodule "emacs.d/private/org-roam-ui"]
 	path = emacs.d/private/org-roam-ui
 	url = https://github.com/org-roam/org-roam-ui.git
+[submodule "emacs.d/private/org-roam"]
+	path = emacs.d/private/org-roam
+	url = https://github.com/org-roam/org-roam
