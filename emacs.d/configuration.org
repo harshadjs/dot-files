@@ -56,9 +56,10 @@
 ** Org Mode Functions
 
 #+BEGIN_SRC emacs-lisp
-(defun hs/org-file-by-date ()
+(defun hs/org-goto-journal ()
   "Create an Org file with current time as name."
-  (find-file (format-time-string "~/mind/journal/journal-%Y-%m.org")))
+  (interactive)
+  (find-file (format-time-string "~/mindmap/journal/journal-%Y-%m.org")))
 
 (defun hs/org-schedule-today ()
   "Schedule the current task to today."
@@ -103,19 +104,20 @@
 ** Generic Packages
   #+BEGIN_SRC emacs-lisp
   (defvar packages  '(
-		  auto-complete
-		  autopair
-		  xcscope
-		  gotham-theme
-		  markdown-mode
-		  company
-		  ido-vertical-mode
-		  org-mime
-		  doom-themes
-		  use-package
-		  websocket
-		  simple-httpd
-		  )
+		      auto-complete
+		      autopair
+		      xcscope
+		      gotham-theme
+		      markdown-mode
+		      company
+		      ido-vertical-mode
+		      org-mime
+		      doom-themes
+		      use-package
+		      websocket
+		      simple-httpd
+		      org-super-agenda
+		      )
     )
 
   (when (>= emacs-major-version 24)
@@ -132,7 +134,7 @@
       (package-refresh-contents)
       (package-install p)))
 
-(setq create-lockfiles nil)
+  (setq create-lockfiles nil)
 
 
 #+END_SRC
@@ -379,7 +381,6 @@
         ido-create-new-buffer 'always
         ido-use-filename-at-point 'guess
         ido-max-prospects 10)
-(setq ido-everywhere t)
 (setq ido-max-directory-size 100000)
 (ido-mode (quote both))
 ; Use the current window when visiting files and buffers with ido
@@ -435,8 +436,10 @@
 
 (require 'org-mouse)
 
+(setq org-startup-with-inline-images t)
+
 (setq org-directory "~/mind")
-(setq org-default-notes-file "~/mind/inbox.org")
+(setq org-default-notes-file "~/mindmap/inbox.org")
 (setq org-use-fast-todo-selection t)
 (setq org-treat-S-cursor-todo-selection-as-state-change nil)
 (setq org-fontify-done-headline t)
@@ -473,8 +476,7 @@
 ; Targets complete directly with IDO
 (setq org-outline-path-complete-in-steps nil)
 
-; Use IDO for both buffer and file completion and ido-everywhere to t
-(setq org-completion-use-ido t)
+;;(setq org-completion-use-ido t)
 ; Use the current window for indirect buffer display
 (setq org-indirect-buffer-display 'current-window)
 
@@ -509,11 +511,11 @@
 *** Agenda Files Configuration
 **** Default configuration
 #+BEGIN_SRC emacs-lisp
-(setq org-agenda-files (directory-files-recursively "~/mind/projects" "\.org$"))
+(setq org-agenda-files (directory-files-recursively "~/mindmap/projects" "\.org$"))
 (add-to-list 'org-agenda-files "~/.emacs.d/configuration.org")
-(add-to-list 'org-agenda-files "~/mind/inbox.org")
-(add-to-list 'org-agenda-files "~/mind/habits.org")
-(add-to-list 'org-agenda-files "~/mind/reminders.org")
+(add-to-list 'org-agenda-files "~/mindmap/inbox.org")
+(add-to-list 'org-agenda-files "~/mindmap/habits.org")
+(add-to-list 'org-agenda-files "~/mindmap/reminders.org")
 #+END_SRC
 
 **** View nodes only configuration
@@ -522,18 +524,17 @@
      This is a config that should only be enabled to see if there are
      any task related items present in nodes/ directory. If such items
      are present, either move them to inbox.org or move them to
-     appropriate project under mind/projects.
+     appropriate project under mindmap/projects.
 #+BEGIN_SRC comment
-(setq org-agenda-files (directory-files-recursively "~/mind/" "\.org$"))
+(setq org-agenda-files (directory-files-recursively "~/mindmap/" "\.org$"))
 (add-to-list 'org-agenda-files "~/.emacs.d/configuration.org")
 #+END_SRC
      
 
 *** Agenda Misc Configuration
 #+BEGIN_SRC emacs-lisp
-(setq org-agenda-overriding-header (hs/org-style-header "This Week's Agenda"))
+;;(setq org-agenda-overriding-header (hs/org-style-header "This Week's Agenda"))
 (setq org-agenda-sorting-strategy '(time-up))
-
 
 (setq org-agenda-tags-column -150)
 
@@ -611,7 +612,7 @@
 
 #+BEGIN_SRC emacs-lisp
 (setq org-todo-keywords
-      (quote ((sequence "TODO(t)" "BLOCKED(b)" "NEXT(n)" "WORKING(w)" "SOMEDAY(s)" "|" "DONE(d)" "CANCELLED(c)")
+      (quote ((sequence "TODO(t)" "BLOCKED(b)" "NEXT(n)" "WORKING(w)" "SOMEDAY(s)" "|" "DONE(d)" "CANCELLED(c)" "OBSOLETE(o)")
 	      )))
 
 (setq org-todo-keyword-faces
@@ -635,9 +636,11 @@
 (add-hook 'org-capture-mode-hook #'my/org-capture-maybe-create-id)
 
 (setq org-capture-templates
-      (quote (("t" "todo" entry (file "~/mind/inbox.org")
+      (quote (("t" "todo" entry (file "~/mindmap/inbox.org")
                "* TODO %?\n%U\n%a\n")
-	      ("r" "reminder" entry (file "~/mind/reminders.org")
+	      ("j" "journal" entry (function hs/org-goto-journal)
+               "* %U %?\n")
+	      ("r" "reminder" entry (file "~/mindmap/reminders.org")
                "* TODO %?\nReminder captured on %U.\n(Add a scheduled / deadline date)\n")	      
 	      )))
 
@@ -668,12 +671,6 @@
                           org-habit
                           org-inlinetask
                           )))
-
-; position the habit graph on the agenda to the right of the default
-(setq org-habit-graph-column 50)
-(setq org-habit-show-all-today t)
-
-(run-at-time "06:00" 86400 '(lambda () (setq org-habit-show-habits t)))
 
 (global-auto-revert-mode t)
 
@@ -823,7 +820,103 @@
 
 ** Custom Agenda Views
 
+*** Super Agenda Try
 #+BEGIN_SRC emacs-lisp
+(org-super-agenda-mode)
+
+(setq org-agenda-block-separator nil)
+(setq org-agenda-span 'day)
+(setq org-habit-show-habits t)
+(setq org-habit-graph-column 50)
+(setq org-habit-show-all-today t)
+(setq org-super-agenda-groups '(
+				(:name "Habits" :habit t)
+				(:name "Today" :time-grid t :scheduled today :date today)
+				(:name "Overdue" :scheduled past)
+				(:name "Upcoming" :scheduled future :deadline future)
+				)
+      )
+
+(defun hs/org-get-scheduled-or-deadline ()
+    (let (
+	  (scheduled (org-get-scheduled-time (point)))
+	  (deadline (org-get-deadline-time (point))))
+      (if scheduled (format-time-string "%d %b %Y" scheduled)
+	(if deadline (format-time-string "%d %b %Y" deadline) "<sub>"))
+      )
+    )
+
+(setq org-agenda-custom-commands
+      '(("o" "Overview"
+	 (
+	  (alltodo "" (
+		       (org-agenda-overriding-header (hs/org-style-header "Overview"))
+		       (org-super-agenda-groups '(
+						  (:name "** Unprocessed **\n" :and (:scheduled nil :deadline nil))
+						  (:name "** Working **\n" :todo "WORKING")
+						  (:name "** Next **\n" :todo "NEXT")
+						  (:name "** Blocked **\n" :todo "BLOCKED")
+						  (:name "** Someday **\n" :todo "SOMEDAY")
+						  (:discard (:anything t))
+						  ))
+		       )
+		   )
+	  (alltodo "" (
+		       (org-agenda-overriding-header "")
+		       (org-agenda-prefix-format " %-20(hs/org-get-scheduled-or-deadline)  ")
+		       (org-super-agenda-groups '(
+						  (:name "** Habits **\n" :habit t)
+						  (:name "** Scheduled **\n" :scheduled t)
+						  (:discard (:anything t))
+						  ))
+		       )
+		   )
+	  (alltodo "" (
+		       (org-agenda-overriding-header "")
+		       (org-agenda-prefix-format " %-20(hs/org-get-scheduled-or-deadline)  ")
+		       (org-super-agenda-groups '(
+						  (:name "** Deadlines **\n" :deadline t)
+						  (:discard (:anything t))
+						  ))
+		       )
+		   )
+	  )
+	 )
+	("d" "Detailed Agenda View"
+	 (
+	  (agenda "" (
+		      (org-agenda-overriding-header (hs/org-style-header "Detailed Agenda View"))
+		      (org-super-agenda-groups '(
+						 (:name "Habits" :habit t)
+						 (:name "Today" :time-grid t :scheduled today :date today)
+						 (:name "Overdue" :scheduled past)
+						 (:name "Upcoming" :scheduled future :deadline future)
+						 )
+					       )
+		      )
+		  )
+	  (alltodo "" (
+		       (org-agenda-overriding-header (hs/org-style-sub-header "Task Groups"))
+		       (org-agenda-prefix-format " %-20(hs/org-get-scheduled-or-deadline)  ")
+		       (org-super-agenda-groups '(
+						  (:name "Scheduled >\n" :scheduled t)
+						  (:name "Deadlines >\n" :deadline t)
+						  (:name "Working >\n" :todo "WORKING")
+						  (:name "Next >\n" :todo "NEXT")
+						  (:name "Blocked >\n" :todo "BLOCKED")
+						  (:name "Someday >\n" :todo "SOMEDAY")
+						  (:name "Unprocessed TODOs >\n" :todo "TODO")
+						  ))
+		       )
+		   )
+	  )
+	 )
+	)
+      )
+#+END_SRC
+*** DEPRECATED Normal View
+
+#+BEGIN_SRC comment
 
 (setq org-agenda-custom-commands
       (quote (
@@ -832,21 +925,28 @@
 		(agenda ""
 			((org-agenda-overriding-header (concat (hs/org-style-header "Overview") (hs/org-style-sub-header "Today")))
 			    (org-agenda-span 'day)
+			    (org-habit-show-habits t)
+			    (org-habit-graph-column 50)
+			    (org-habit-show-all-today t)
 			    (org-agenda-compact-blocks nil)))
-		(tags "+sticky"
-                      ((org-agenda-overriding-header (hs/org-style-sub-header "Sticky Notes"))
-		       (org-agenda-compact-blocks t)
-                       (org-tags-match-list-sublevels nil)))
 		(todo "WORKING|NEXT|TODO|BLOCKED"
-                      ((org-agenda-overriding-header (hs/org-style-sub-header "Upcoming Items"))
+                      ((org-agenda-overriding-header (hs/org-style-sub-header "Scheduled"))
 		       (org-agenda-compact-blocks t)
 		       (org-agenda-skip-function '(org-agenda-skip-subtree-if 'notscheduled))
-		       (org-agenda-prefix-format " %-20(let ((scheduled (org-get-scheduled-time (point)))) (if scheduled (format-time-string \"%d %b '%y\" scheduled) \"<sub>\")):  ")
+		       (org-agenda-prefix-format " %-20(let ((scheduled (org-get-scheduled-time (point)))) (if scheduled (format-time-string \"%d %b %Y\" scheduled) \"<sub>\"))  ")
 		       (org-agenda-sorting-strategy '(scheduled-up time-up))))
-		(tags-todo "-skip_unscheduled/WORKING|NEXT|TODO|BLOCKED"
-                      ((org-agenda-overriding-header (hs/org-style-sub-header "Unscheduled Items"))
+		(tags-todo "+TODO+DEADLINE<=\"<2022-12-31>\""
+                      ((org-agenda-overriding-header (hs/org-style-sub-header "Deadlines"))
 		       (org-agenda-compact-blocks t)
-		       (org-agenda-skip-function '(org-agenda-skip-subtree-if 'scheduled))
+		       (org-agenda-skip-function '(org-agenda-skip-subtree-if 'notdeadline))
+		       (org-agenda-prefix-format " %-20(let ((deadline (org-get-deadline-time (point)))) (if deadline (format-time-string \"%d %b %Y\" deadline) \"<sub>\"))  ")
+		       (org-agenda-sorting-strategy '(scheduled-up time-up))))
+		(todo "WORKING|NEXT|TODO|BLOCKED"
+                      ((org-agenda-overriding-header (hs/org-style-sub-header "Unscheduled"))
+		       ;;(org-agenda-prefix-format " %-20(let ((scheduled (org-get-scheduled-time (point)))) (if scheduled (format-time-string \"%d %b '%y\" scheduled) \"<sub>\")):  ")
+		       (org-agenda-prefix-format '((todo . "%i   %-20c")))
+		       (org-agenda-compact-blocks t)
+		       (org-agenda-skip-function '(org-agenda-skip-subtree-if 'scheduled 'deadline))
 		       (org-agenda-sorting-strategy '(todo-state-down priority-down))))
 	       )
 	      )
@@ -982,7 +1082,7 @@
 
 #+BEGIN_SRC emacs-lisp
 (setq org-archive-mark-done nil)
-(setq org-archive-location "~/mind/archives/%s-archived::* Archived Tasks")
+(setq org-archive-location "~/mindmap/archives/%s-archived::* Archived Tasks")
 
 (setq org-alphabetical-lists t)
 #+END_SRC
@@ -1061,7 +1161,7 @@
 (use-package org-roam
    :ensure t
    :custom
-   (org-roam-directory (file-truename "~/mind/"))
+   (org-roam-directory (file-truename "~/mindmap/"))
    :bind (("C-c n l" . org-roam-buffer-toggle)
           ("C-c n f" . org-roam-node-find)
           ("C-c n g" . org-roam-graph)
@@ -1076,7 +1176,7 @@
 (setq org-roam-graph-executable "/usr/local/bin/dot")
 
 (setq org-roam-capture-templates '(("d" "default" plain "%?"
-     :if-new (file+head "~/mind/nodes/${slug}.org"
+     :if-new (file+head "~/mindmap/nodes/${slug}.org"
                         "#+title: ${title}\n")
      :unnarrowed t)))
 
@@ -1091,17 +1191,23 @@
 #+END_SRC
 *** Common settings
 #+BEGIN_SRC emacs-lisp    
-(setq org-roam-directory (file-truename "~/mind/"))
-(setq org-roam-dailies-directory (file-truename "~/mind/journal"))
+(setq org-roam-directory (file-truename "~/mindmap/"))
+(setq org-roam-dailies-directory "snippets")
 (setq org-roam-graph-executable "/usr/local/bin/dot")
+
+(setq org-roam-dailies-capture-templates
+      '(("d" "default" entry
+         "* %T %?"
+         :if-new (file+head "%<%Y-%W>.org"
+                            "#+title: %<%Y, Week %W>"))))
 
 (setq org-roam-capture-templates
       '(("d" "default" plain "%?"
-	 :if-new (file+head "~/mind/nodes/${slug}.org"
+	 :if-new (file+head "~/mindmap/nodes/${slug}.org"
                         "#+title: ${title}\n")
 	 :unnarrowed t)
 	("p" "project" plain "%?"
-	 :if-new (file+head "~/mind/projects/${slug}.org"
+	 :if-new (file+head "~/mindmap/projects/${slug}.org"
                         "#+title: ${title}\n* ${title} :project:")
 	 :unnarrowed t))
       )
@@ -1111,25 +1217,50 @@
 (global-set-key (kbd "C-c n i") 'org-roam-node-insert)
 (global-set-key (kbd "C-c n c") 'org-roam-capture)
 (global-set-key (kbd "C-c n s") 'org-roam-db-sync)
-(global-set-key (kbd "C-c n o") 'hs/org-roamify)
 
 (global-set-key (kbd "C-c n t") 'org-roam-dailies-goto-today)
 (global-set-key (kbd "C-c n d") 'org-roam-dailies-goto-date)
 
+(global-set-key (kbd "C-c n o") 'hs/org-roamify)
+(global-set-key (kbd "C-c n r") 'hs/org-refresh)
+(global-set-key (kbd "C-c n j") 'hs/org-goto-journal)
+
 (org-roam-db-autosync-mode)
 
+;; Use helm package for org-roam completions, these are awesome!
+(use-package helm :ensure t :config (helm-mode))
 #+END_SRC
 
+** Roam buffer
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'display-buffer-alist
+             '("\\*org-roam\\*"
+               (display-buffer-in-side-window)
+               (side . right)
+               (slot . 0)
+               (window-width . 0.33)
+               (window-parameters . ((no-other-window . t)
+                                     (no-delete-other-windows . t)))))
+(setq org-roam-mode-section-functions
+      (list #'org-roam-backlinks-section
+            #'org-roam-reflinks-section
+            #'org-roam-unlinked-references-section
+            ))
+#+END_SRC
 ** Roam UI
    Roam UI hasn't yet made to melpa which is why I have configured it
    as a submodule within the dot-emacs config. I should check maybe in
    6 months or so if it has madee it to melpa and whenever it does, I
    should remove the following block and simply use =use-package=.
 #+BEGIN_SRC emacs-lisp
+
 (add-to-list 'load-path "~/.emacs.d/private/org-roam-ui")
 (load-library "org-roam-ui")
 
 (global-set-key (kbd "C-c n u") 'org-roam-ui-open)
+(global-set-key (kbd "C-c n z") 'org-roam-ui-node-zoom)
+(global-set-key (kbd "C-c n n") 'org-roam-ui-node-local)
+
 #+END_SRC
 
 *** TODO Check if [[https://github.com/org-roam/org-roam-ui][roam ui]] has made it to melpa      :skip_unscheduled:
@@ -1160,20 +1291,23 @@
    Custom defined function to reset org-agenda-files and also perform
    roam db sync.
    #+BEGIN_SRC emacs-lisp
-      (defun hs/org-refresh()
-	(interactive)
-	(setq org-agenda-files (directory-files-recursively "~/mind/" "\.org$"))
-	(add-to-list 'org-agenda-files "~/.emacs.d/configuration.org")
-	(org-roam-db-sync)
-	)
-   (defun hs/org-roamify()
-	(interactive)
-     (org-id-get-create)
-     )
-   (defun hs/org-roam-enable-ui()
-	(interactive)
-     (org-roam-ui-mode)
-     )
+    (defun hs/org-refresh()
+      (interactive)
+      (setq org-agenda-files (directory-files-recursively "~/mindmap/" "\.org$"))
+      (add-to-list 'org-agenda-files "~/.emacs.d/configuration.org")
+      (org-roam-db-sync)
+      )
+    (defun hs/org-roamify()
+      (interactive)
+      (org-id-get-create)
+      )
+    (defun hs/org-roam-enable-ui()
+      (interactive)
+      (org-roam-ui-mode)
+      )
+    (defun hs/org-roam-goto-todays-journal()
+      (find-file )
+      )
    #+END_SRC
 
 * Keybindings
@@ -1202,7 +1336,6 @@
 (global-set-key (kbd "C-c t") 'hs/org-schedule-today)
 (global-set-key (kbd "C-c i") 'org-clock-in)
 (global-set-key (kbd "C-c o") 'org-clock-out)
-(global-set-key (kbd "C-c n r") 'hs/org-refresh)
 
 ;; ibuffer
 (global-set-key (kbd "C-x C-b") 'ibuffer)
