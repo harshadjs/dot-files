@@ -47,13 +47,15 @@ ZSH_THEME="robbyrussell"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git)
 
-source $ZSH/oh-my-zsh.sh
+if [ -f $ZSH/oh-my-zsh.sh ]; then
+   source $ZSH/oh-my-zsh.sh
+fi
 
 # User configuration
 
 setopt NO_HUP
 unsetopt share_history
-export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games"
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/Users/harshads/bin"
 # export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment
@@ -90,10 +92,8 @@ alias e='/Applications/Emacs.app/Contents/MacOS/Emacs'
 alias logoff='gnome-session-save --kill --silent'
 alias get='sudo apt-get install'
 alias enw='emacs -nw '
-alias org='emacs ~/org/planner.org&'
-alias orgn='emacs -nw ~/org/planner.org'
 alias note='emacs -nw --eval "(make-capture-frame) "'
-
+alias agenda='emacs -nw --eval "(org-agenda)"'
 function get_term_name
 {
 	echo "default"
@@ -142,7 +142,7 @@ alias vssh='vagrant ssh'
 alias vup='vagrant up'
 alias vhalt='vagrant halt'
 
-export PS1="%U%*%u %F{cyan}%B%n %1~%f%b\$(git_prompt)%F{cyan} [%j]%B %(?.%#.%S[%?]!%s)%b%f "
+export PS1="%U%*%u %F{cyan}%B%n %1~%f%b%F{cyan} [%j]%B %(?.%#.%S[%?]!%s)%b%f "
 
 ## Don't allow tmux to change window name automatically
 DISABLE_AUTO_TITLE=true
@@ -153,3 +153,9 @@ if [ "$SSH_TTY" != "" ]; then
     ## Things that are different for an SSH session
     tmux set-option prefix C-q>/dev/null 2>&1
 fi
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/harshads/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/harshads/Downloads/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/harshads/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/harshads/Downloads/google-cloud-sdk/completion.zsh.inc'; fi

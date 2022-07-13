@@ -1,6 +1,6 @@
 #+TITLE: Emacs Configuration
 #+AUTHOR: Harshad Shirwadkar
-#+FILETAGS: config
+#+FILETAGS: config agenda
 
 * Emacs Configuration                                         :project:
   :PROPERTIES:
@@ -59,7 +59,7 @@
 (defun hs/org-goto-journal ()
   "Create an Org file with current time as name."
   (interactive)
-  (find-file (format-time-string "~/mindmap/journal/journal-%Y-%m.org")))
+  (find-file (format-time-string "~/pkm/journal/journal-%Y-%m.org")))
 
 (defun hs/org-schedule-today ()
   "Schedule the current task to today."
@@ -78,13 +78,6 @@
 (defun hs/org-style-sub-header (arg)
   "Stylize the header for org agenda."
   (concat "\n** " arg " **\n")
-  )
-
-(defun hs/org-refresh()
-  (interactive)
-  (setq org-agenda-files (directory-files-recursively "~/mindmap/" "\.org$"))
-  (add-to-list 'org-agenda-files "~/.emacs.d/configuration.org")
-  (org-roam-db-sync)
   )
 
 (defun hs/org-roamify()
@@ -136,6 +129,9 @@
 		      simple-httpd
 		      org-super-agenda
 		      org-roam-ui
+		      org-ql
+		      org-download
+		      poet-theme
 		      )
     )
 
@@ -193,7 +189,9 @@
    #+BEGIN_SRC emacs-lisp
    (if (display-graphic-p)
        (if (file-exists-p "~/.emacs-light")
-	   (load-theme 'adwaita t)
+	   ;; (load-theme 'adwaita t)
+	   ;; (load-theme 'wombat t))
+	   (load-theme 'doom-nord-light t)
 	   (load-theme 'wombat t))
      (load-theme 'doom-molokai t)
      )
@@ -260,6 +258,12 @@
 (set-face-background 'vertical-border "white")
 (set-face-foreground 'vertical-border "white")
 
+;; Disable status and header lines for cleaner appearance
+(setq-default header-line-format nil)
+(setq-default mode-line-format nil)
+
+;; Disabel Fringes
+(set-fringe-style 0)
 #+END_SRC
 
 * [[https://www.emacswiki.org/emacs/WinnerMode][Winner Mode]]
@@ -297,7 +301,7 @@
   (setq linum-format "%4d | ")
   )
 
-(global-linum-mode 1)
+(global-linum-mode 0)
 #+END_SRC    
 
 * [[https://github.com/joaotavora/autopair][Autopair Mode]]
@@ -474,6 +478,7 @@
 (require 'org-mouse)
 (require 'org-protocol)
 (require 'org-mime)
+(require 'org-download)
 
 (setq org-modules (quote (
                           org-id
@@ -483,8 +488,9 @@
 
 (setq org-startup-with-inline-images t)
 
-(setq org-directory "~/mind")
-(setq org-default-notes-file "~/mindmap/inbox.org")
+(setq org-directory "~/pkm")
+(setq org-default-notes-file "~/pkm/inbox.org")
+(setq-default org-download-image-dir "~/pkm/data")
 
 (setq org-use-fast-todo-selection t)
 (setq org-use-speed-commands t)
@@ -500,7 +506,7 @@
 (setq org-global-properties (quote (("Effort_ALL" . "0:15 0:30 0:45 1:00 2:00 3:00 4:00 5:00 6:00 0:00")
                                     ("STYLE_ALL" . "habit"))))
 (setq org-enforce-todo-dependencies t)
-(setq org-startup-indented t)
+(setq org-startup-indented nil)
 (setq org-cycle-separator-lines 1)
 (setq org-blank-before-new-entry (quote ((heading)
                                          (plain-list-item . auto))))
@@ -549,19 +555,69 @@
 (setq org-time-clocksum-format
       '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
 
-(setq org-emphasis-alist (quote (("*" bold "<b>" "</b>")
-                                 ("/" italic "<i>" "</i>")
-                                 ("_" underline "<span style=\"text-decoration:underline;\">" "</span>")
-                                 ("=" org-code "<code>" "</code>" verbatim)
-                                 ("~" org-verbatim "<code>" "</code>" verbatim))))
-
 (setq org-use-sub-superscripts nil)
 (setq org-odd-levels-only nil)
-(setq org-startup-indented nil)
 
 (setq org-stuck-projects
       '("+project/-DONE" ("NEXT" "TODO") ()
         "\\<IGNORE\\>"))
+
+(setq org-speed-commands-user (quote (("0" . ignore)
+                                      ("1" . ignore)
+                                      ("2" . ignore)
+                                      ("3" . ignore)
+                                      ("4" . ignore)
+                                      ("5" . ignore)
+                                      ("6" . ignore)
+                                      ("7" . ignore)
+                                      ("8" . ignore)
+                                      ("9" . ignore)
+
+                                      ("a" . ignore)
+                                      ("d" . ignore)
+                                      ("i" progn
+                                       (forward-char 1)
+                                       (call-interactively 'org-insert-heading-respect-content)
+
+                                      ("k" . org-kill-note-or-show-branches)
+                                      ("l" . ignore)
+                                      ("m" . ignore)
+                                      ("r" . ignore)
+                                      ("s" . org-save-all-org-buffers)
+                                      ("w" . org-refile)
+                                      ("x" . hs/org-schedule-today)
+                                      ("y" . ignore)
+                                      ("z" . org-add-note)
+
+                                      ("A" . ignore)
+                                      ("B" . ignore)
+                                      ("E" . ignore)
+                                      ("G" . ignore)
+                                      ("H" . ignore)
+                                      ("J" . org-clock-goto)
+                                      ("K" . ignore)
+                                      ("L" . ignore)
+                                      ("M" . ignore)
+                                      ("N" . org-narrow-to-subtree)
+                                      ("Q" . ignore)
+                                      ("R" . ignore)
+                                      ("S" . ignore)
+                                      ("V" . ignore)
+                                      ("W" . widen)
+                                      ("X" . ignore)
+                                      ("Y" . ignore)
+                                      ("Z" . ignore)))))
+
+(add-hook 'dired-mode-hook 'org-download-enable)
+#+END_SRC
+
+** Special Links for Google
+#+BEGIN_SRC emacs-lisp
+(org-add-link-type "l" 'org-l-open)
+
+(defun org-l-open (url)
+  "Open the google link"
+  (browse-url (concat "http://" url)))
 
 #+END_SRC
 
@@ -572,15 +628,6 @@
    tracked in weekly review.
 #+BEGIN_SRC emacs-lisp
 (setq org-log-done (quote note))
-(setq org-log-note-headings '((done . "State %-12s from %-12S %t")
- (state . "State %-12s from %-12S %t")
- (note . "Note taken on %t")
- (reschedule . "Rescheduled from %S on %t")
- (delschedule . "Not scheduled, was %S on %t")
- (redeadline . "New deadline from %S on %t")
- (deldeadline . "Removed deadline, was %S on %t")
- (refile . "Refiled on %t")
- (clock-out . "")))
 (setq org-log-into-drawer t)
 (setq org-log-state-notes-insert-after-drawers nil)
 #+END_SRC
@@ -594,7 +641,7 @@
 
 #+BEGIN_SRC emacs-lisp
 (setq org-todo-keywords
-      (quote ((sequence "TODO(t)" "BLOCKED(b)" "NEXT(n)" "WORKING(w)" "SOMEDAY(s)" "|" "DONE(d)" "CANCELLED(c)" "OBSOLETE(o)")
+      (quote ((sequence "TODO(t)" "BLOCKED(b)" "NEXT(n)" "WORKING(w)" "SOMEDAY(s)" "|" "DONE(d)" "CANCELLED(c)" "OBSOLETE(o)" "DONE-IMPORTANT(x)")
 	      )))
 
 (setq org-todo-keyword-faces
@@ -603,6 +650,7 @@
 	      ("BLOCKED" :foreground "pink" :weight bold)
               ("NEXT" :foreground "blue" :weight bold)
               ("DONE" :foreground "forest green" :weight bold)
+              ("DONE" :foreground "yellow" :weight bold)
 	      ("CANCELLED" :foreground "gray" :weight bold)
 	      )))
 
@@ -612,17 +660,17 @@
 
 #+BEGIN_SRC emacs-lisp
 ;; Capture templates for: TODO tasks, Notes, appointments, meetings, and org-protocol
-(defun my/org-capture-maybe-create-id ()
+(defun hs/org-capture-maybe-create-id ()
   (when (org-capture-get :create-id)
     (org-id-get-create)))
-(add-hook 'org-capture-mode-hook #'my/org-capture-maybe-create-id)
+(add-hook 'org-capture-mode-hook #'hs/org-capture-maybe-create-id)
 
 (setq org-capture-templates
-      (quote (("t" "todo" entry (file "~/mindmap/inbox.org")
+      (quote (("t" "todo" entry (file "~/pkm/inbox.org")
                "* TODO %?\n%U\n%a\n")
 	      ("j" "journal" entry (function hs/org-goto-journal)
                "* %U %?\n")
-	      ("r" "reminder" entry (file "~/mindmap/reminders.org")
+	      ("r" "reminder" entry (file "~/pkm/reminders.org")
                "* TODO %?\nReminder captured on %U.\n(Add a scheduled / deadline date)\n")	      
 	      )))
 
@@ -648,11 +696,31 @@
 *** Agenda Files Configuration
 **** Default configuration
 #+BEGIN_SRC emacs-lisp
-(setq org-agenda-files (directory-files-recursively "~/mindmap/projects" "\.org$"))
+;; The buffer you put this code in must have lexical-binding set to t!
+;; See the final configuration at the end for more details.
+
+(defun hs/org-roam-filter-by-tag (tag-name)
+  (lambda (node)
+    (member tag-name (org-roam-node-tags node))))
+
+(defun hs/org-roam-list-notes-by-tag (tag-name)
+  (mapcar #'org-roam-node-file
+          (seq-filter
+           (hs/org-roam-filter-by-tag tag-name)
+           (org-roam-node-list))))
+
+(defun hs/org-roam-refresh-agenda-list ()
+  (interactive)
+  (setq org-agenda-files (hs/org-roam-list-notes-by-tag "agenda")))
+
+;; Build the agenda list the first time for the session
+(hs/org-roam-refresh-agenda-list)
+
 (add-to-list 'org-agenda-files "~/.emacs.d/configuration.org")
-(add-to-list 'org-agenda-files "~/mindmap/inbox.org")
-(add-to-list 'org-agenda-files "~/mindmap/habits.org")
-(add-to-list 'org-agenda-files "~/mindmap/reminders.org")
+(add-to-list 'org-agenda-files "~/pkm/nodes/inbox.org")
+(add-to-list 'org-agenda-files "~/pkm/nodes/habits.org")
+(add-to-list 'org-agenda-files "~/pkm/nodes/reminders.org")
+
 #+END_SRC
 
 **** View nodes only configuration
@@ -661,19 +729,20 @@
      This is a config that should only be enabled to see if there are
      any task related items present in nodes/ directory. If such items
      are present, either move them to inbox.org or move them to
-     appropriate project under mindmap/projects.
+     appropriate project under pkm/projects.
 #+BEGIN_SRC comment
-(setq org-agenda-files (directory-files-recursively "~/mindmap/" "\.org$"))
+(setq org-agenda-files (directory-files-recursively "~/pkm/" "\.org$"))
 (add-to-list 'org-agenda-files "~/.emacs.d/configuration.org")
 #+END_SRC
      
 
 *** Agenda Misc Configuration
 #+BEGIN_SRC emacs-lisp
-;;(setq org-agenda-overriding-header (hs/org-style-header "This Week's Agenda"))
 (setq org-agenda-sorting-strategy '(time-up))
 
 (setq org-agenda-tags-column -150)
+
+(setq org-agenda-start-with-log-mode t)
 
 (add-hook 'org-agenda-mode-hook
           '(lambda ()
@@ -840,7 +909,7 @@
 
 #+BEGIN_SRC emacs-lisp
 (setq org-archive-mark-done nil)
-(setq org-archive-location "~/mindmap/archives/%s-archived::* Archived Tasks")
+(setq org-archive-location "~/pkm/archives/%s-archived::* Archived Tasks")
 
 (setq org-alphabetical-lists t)
 #+END_SRC
@@ -848,7 +917,7 @@
 ** Roam
 
 #+BEGIN_SRC emacs-lisp    
-(setq org-roam-directory (file-truename "~/mindmap/"))
+(setq org-roam-directory (file-truename "~/pkm/"))
 (setq org-roam-dailies-directory "snippets")
 (setq org-roam-graph-executable "/usr/local/bin/dot")
 
@@ -856,18 +925,27 @@
       '(("d" "default" entry
          "* %T %?"
          :if-new (file+head "%<%Y-%W>.org"
-                            "#+title: %<%Y, Week %W>"))))
+                            "#+title: %<%Y, Week %W>\n#+filetags: weekly agenda\n"))))
 
 (setq org-roam-capture-templates
-      '(("d" "default" plain "%?"
-	 :if-new (file+head "~/mindmap/nodes/${slug}.org"
-                        "#+title: ${title}\n")
-	 :unnarrowed t)
-	("p" "project" plain "%?"
-	 :if-new (file+head "~/mindmap/projects/${slug}.org"
-                        "#+title: ${title}\n* ${title} :project:")
-	 :unnarrowed t))
-      )
+      '(
+	("w" "work" plain "%?"
+	 :if-new (file+head "~/pkm/nodes/work/${slug}.org"
+                            "#+title: ${title}\n#+timestamp: %T\n#+filetags: work\n")
+	 :unnarrowed t :immediate-finish t)
+	("p" "personal" plain "%?"
+	 :if-new (file+head "~/pkm/nodes/personal/${slug}.org"
+                            "#+title: ${title}\n#+timestamp: %T\n#+filetags: personal\n")
+	 :unnarrowed t :immediate-finish t)
+	("x" "work/project" plain "%?"
+	 :if-new (file+head "~/pkm/work/projects/${slug}.org"
+                            "#+title: ${title}\n#+timestamp: %T\n#+filetags: work project agenda\n")
+	 :unnarrowed t :immediate-finish t)
+	("y" "personal/project" plain "%?"
+	 :if-new (file+head "~/pkm/personal/projects/${slug}.org"
+                            "#+title: ${title}\n#+timestamp: %T\n#+filetags: personal project agenda\n")
+	 :unnarrowed t :immediate-finish t)
+      ))
 
 (global-set-key (kbd "C-c n l") 'org-roam-buffer-toggle)
 (global-set-key (kbd "C-c n f") 'org-roam-node-find)
@@ -879,8 +957,8 @@
 (global-set-key (kbd "C-c n d") 'org-roam-dailies-goto-date)
 
 (global-set-key (kbd "C-c n o") 'hs/org-roamify)
-(global-set-key (kbd "C-c n r") 'hs/org-refresh)
 (global-set-key (kbd "C-c n j") 'hs/org-goto-journal)
+(global-set-key (kbd "C-c n r") 'hs/org-roam-refresh-agenda-list)
 
 (org-roam-db-autosync-mode)
 
@@ -909,7 +987,7 @@
 #+BEGIN_SRC emacs-lisp
 
 ;;(add-to-list 'load-path "~/.emacs.d/private/org-roam-ui")
-(load-library "org-roam-ui")
+;;(load-library "org-roam-ui")
 
 (global-set-key (kbd "C-c n u") 'org-roam-ui-open)
 (global-set-key (kbd "C-c n z") 'org-roam-ui-node-zoom)
@@ -1030,6 +1108,6 @@
 (require 'server)
 (or (server-running-p)
     (server-start))
-
 #+END_SRC
+
 
