@@ -49,32 +49,15 @@ PROPERTIES:
 		      websocket
 		      simple-httpd
 		      org-super-agenda
-		      org-roam-ui
 		      org-ql
 		      org-download
+		      org-roam
+		      org-roam-ui
 		      poet-theme
 		      hyperbole
 		      deadgrep
 		      )
     )
-
-  #+END_SRC
-
-*** Manual loading of Org Roam
-I have disabled this automatic loading of org-roam from melpa for some
-reason enabling org-roam using use-package (or melpa) is resulting in
-org-roam-ui complaining that i'm using old version of org-roam. After
-a bit of debugging, I found that it's some symbol called org citations
-or something (search for citations in org-roam-db.el file) was missing
-in my org-roam-db.el. So for now, I am including org-roam directly
-from git in my private packages folder. Until that gets resolved, this
-mode of enabling roam is disabled.
-
-#+BEGIN_SRC elisp
-  (add-to-list 'load-path "~/.emacs.d/private/org-roam/")
-  (add-to-list 'load-path "~/.emacs.d/private/org-roam/extensions/")
-  (setq org-roam-v2-ack t)
-  (require 'org-roam)
 
   (when (>= emacs-major-version 24)
     (require 'package)
@@ -90,7 +73,27 @@ mode of enabling roam is disabled.
       (package-install p)))
 
   (setq create-lockfiles nil)
+
+  #+END_SRC
+
+*** Manual loading of Org Roam
+I have disabled this automatic loading of org-roam from melpa for some
+reason enabling org-roam using use-package (or melpa) is resulting in
+org-roam-ui complaining that i'm using old version of org-roam. After
+a bit of debugging, I found that it's some symbol called org citations
+or something (search for citations in org-roam-db.el file) was missing
+in my org-roam-db.el. So for now, I am including org-roam directly
+from git in my private packages folder. Until that gets resolved, this
+mode of enabling roam is disabled.
+
+EDIT - This is not a problem anymore. So I'm only keeping it for
+reference.
+
+#+BEGIN_SRC comment
+  (add-to-list 'load-path "~/.emacs.d/private/org-roam/")
+  (add-to-list 'load-path "~/.emacs.d/private/org-roam/extensions/")
 #+END_SRC
+
 ** Google Internal Packages
 #+BEGIN_SRC emacs-lisp
 (defun require-google-specific-packages ()
@@ -461,19 +464,6 @@ mode of enabling roam is disabled.
   (org-roam-ui-mode)
   )
 
-(defun org-generic-shortlinks-open (url)
-  "Open generic shortlinks"
-  (browse-url (concat "http://" url)))
-
-(defun org-harshad-shortlinks-open (url)
-  "Open the google link"
-  (browse-url (concat "http://go.harshad.me/" url)))
-
-(defun org-b-click (action)
-  "Perform a specific action"
-  (if (string= action "click") (org-agenda-filter))
-  )
-
 (defun hs/org-capture-maybe-create-id ()
   (when (org-capture-get :create-id)
     (org-id-get-create)))
@@ -621,6 +611,20 @@ mode of enabling roam is disabled.
 
 ** Short Links 
 #+BEGIN_SRC emacs-lisp
+(defun org-generic-shortlinks-open (url)
+  "Open generic shortlinks"
+  (browse-url (concat "http://" url)))
+
+(defun org-harshad-shortlinks-open (url)
+  "Open the google link"
+  (browse-url (concat "http://go.harshad.me/" url)))
+
+(defun org-b-click (action)
+  "Perform a specific action"
+  (if (string= action "click") (org-agenda-filter))
+  )
+
+
 (org-add-link-type "l" 'org-generic-shortlinks-open)
 (org-add-link-type "h" 'org-harshad-shortlinks-open)
 (org-add-link-type "b" 'org-b-click)
@@ -690,6 +694,104 @@ review.
 ; Allow refile to create parent tasks with confirmation
 (setq org-refile-allow-creating-parent-nodes (quote confirm))
 #+END_SRC
+
+** Roam
+
+#+BEGIN_SRC emacs-lisp    
+(setq org-roam-v2-ack t)
+(require 'org-roam)
+
+(setq org-roam-directory (file-truename "~/pkm/"))
+(setq org-roam-dailies-directory "weekly")
+(setq org-roam-graph-executable "/usr/local/bin/dot")
+
+(setq org-roam-dailies-capture-templates
+      '(("d" "default" entry
+         "* %T %?"
+         :if-new (file+head "%<%Y-%W>.org"
+                            "#+title: %<%Y, Week %W>\n#+filetags: weekly agenda\n"))))
+
+(setq org-roam-capture-templates
+      '(
+	("p" "personal" plain "%?"
+	 :if-new (file+head "~/pkm/nodes/personal/${slug}.org"
+                            "#+title: ${title}\n#+timestamp: %T\n#+filetags: personal\n")
+	 :unnarrowed t :immediate-finish t)
+	)
+      )
+
+(global-set-key (kbd "C-c n l") 'org-roam-buffer-toggle)
+(global-set-key (kbd "C-c n f") 'org-roam-node-find)
+(global-set-key (kbd "C-c n i") 'org-roam-node-insert)
+(global-set-key (kbd "C-c n c") 'org-roam-capture)
+(global-set-key (kbd "C-c n s") 'org-roam-db-sync)
+
+(global-set-key (kbd "C-c n t") 'org-roam-dailies-goto-today)
+(global-set-key (kbd "C-c n d") 'org-roam-dailies-goto-date)
+
+(global-set-key (kbd "C-c n o") 'hs/org-roamify)
+(global-set-key (kbd "C-c n j") 'hs/org-goto-journal)
+(global-set-key (kbd "C-c n r") 'hs/org-roam-refresh-agenda-list)
+
+(org-roam-db-autosync-mode)
+
+;; Use helm package for org-roam completions, these are awesome!
+(use-package helm :ensure t :config (helm-mode))
+#+END_SRC
+
+*** Quick Insert Work Nodes
+
+As opposed to =org-roam-node-insert=, this function allows you to
+insert a "work" node immediately without you having to break your
+writing. Just use a different key for this! (C-c n w)
+
+#+BEGIN_SRC emacs-lisp
+(defun hs/org-roam-node-insert-work ()
+  (interactive)
+  (org-roam-node-insert
+   (lambda (node)
+     (member "work" (org-roam-node-tags node)))
+   :templates
+   '(("w" "work" plain "%?"
+      :if-new (file+head "~/pkm/nodes/work/${slug}.org"
+                         "#+title: ${title}\n#+timestamp: %T\n#+filetags: work\n")
+      :unnarrowed t :immediate-finish t))))
+
+(global-set-key (kbd "C-c n w") 'hs/org-roam-node-insert-work)
+
+#+END_SRC
+
+** Roam buffer
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'display-buffer-alist
+             '("\\*org-roam\\*"
+               (display-buffer-in-side-window)
+               (side . right)
+               (slot . 0)
+               (window-width . 0.33)
+               (window-parameters . ((no-other-window . t)
+                                     (no-delete-other-windows . t)))))
+(setq org-roam-mode-section-functions
+      (list #'org-roam-backlinks-section
+            #'org-roam-reflinks-section
+            #'org-roam-unlinked-references-section
+            ))
+#+END_SRC
+
+** Roam UI
+#+BEGIN_SRC emacs-lisp
+
+;;(add-to-list 'load-path "~/.emacs.d/private/org-roam-ui")
+;;(load-library "org-roam-ui")
+
+(require 'org-roam-ui)
+
+(global-set-key (kbd "C-c n u") 'org-roam-ui-open)
+(global-set-key (kbd "C-c n z") 'org-roam-ui-node-zoom)
+(global-set-key (kbd "C-c n n") 'org-roam-ui-node-local)
+
+#+END_SRC
+
 
 ** Agenda Configuration
 *** Agenda Files Configuration
@@ -865,12 +967,12 @@ project under pkm/projects.
 ** Special Tags
 #+BEGIN_SRC emacs-lisp
 ; Tags with fast selection keys
-(setq org-tag-alist (quote (("read" . ?r)
-                            ("note" . ?n)
-			    ("quick" . ?q)
-			    ("sticky" . ?s)
+(setq org-tag-alist (quote (
+			    ("urgent" . ?u)
+			    ("agenda" . ?a)
+			    ("personal" . ?p)
 			    ("work" . ?w)
-			    ("project" . ?p)
+			    ("project" . ?r)
 			    )))
 
 ; Allow setting single tags without the menu
@@ -890,100 +992,6 @@ project under pkm/projects.
 #+BEGIN_SRC emacs-lisp
 (global-set-key (kbd "C-c d") #'deadgrep)
 #+END_SRC
-
-** Roam
-
-#+BEGIN_SRC emacs-lisp    
-(setq org-roam-directory (file-truename "~/pkm/"))
-(setq org-roam-dailies-directory "weekly")
-(setq org-roam-graph-executable "/usr/local/bin/dot")
-
-(setq org-roam-dailies-capture-templates
-      '(("d" "default" entry
-         "* %T %?"
-         :if-new (file+head "%<%Y-%W>.org"
-                            "#+title: %<%Y, Week %W>\n#+filetags: weekly agenda\n"))))
-
-(setq org-roam-capture-templates
-      '(
-	("p" "personal" plain "%?"
-	 :if-new (file+head "~/pkm/nodes/personal/${slug}.org"
-                            "#+title: ${title}\n#+timestamp: %T\n#+filetags: personal\n")
-	 :unnarrowed t :immediate-finish t)
-      )
-      )
-
-(global-set-key (kbd "C-c n l") 'org-roam-buffer-toggle)
-(global-set-key (kbd "C-c n f") 'org-roam-node-find)
-(global-set-key (kbd "C-c n i") 'org-roam-node-insert)
-(global-set-key (kbd "C-c n c") 'org-roam-capture)
-(global-set-key (kbd "C-c n s") 'org-roam-db-sync)
-
-(global-set-key (kbd "C-c n t") 'org-roam-dailies-goto-today)
-(global-set-key (kbd "C-c n d") 'org-roam-dailies-goto-date)
-
-(global-set-key (kbd "C-c n o") 'hs/org-roamify)
-(global-set-key (kbd "C-c n j") 'hs/org-goto-journal)
-(global-set-key (kbd "C-c n r") 'hs/org-roam-refresh-agenda-list)
-
-(org-roam-db-autosync-mode)
-
-;; Use helm package for org-roam completions, these are awesome!
-(use-package helm :ensure t :config (helm-mode))
-#+END_SRC
-
-*** Quick Insert Work Nodes
-
-As opposed to =org-roam-node-insert=, this function allows you to
-insert a "work" node immediately without you having to break your
-writing. Just use a different key for this! (C-c n w)
-
-#+BEGIN_SRC emacs-lisp
-(defun hs/org-roam-node-insert-work ()
-  (interactive)
-  (org-roam-node-insert
-   (lambda (node)
-     (member "work" (org-roam-node-tags node)))
-   :templates
-   '(("w" "work" plain "%?"
-      :if-new (file+head "~/pkm/nodes/work/${slug}.org"
-                         "#+title: ${title}\n#+timestamp: %T\n#+filetags: work\n")
-      :unnarrowed t :immediate-finish t))))
-
-(global-set-key (kbd "C-c n w") 'hs/org-roam-node-insert-work)
-
-#+END_SRC
-
-
-** Roam buffer
-#+BEGIN_SRC emacs-lisp
-(add-to-list 'display-buffer-alist
-             '("\\*org-roam\\*"
-               (display-buffer-in-side-window)
-               (side . right)
-               (slot . 0)
-               (window-width . 0.33)
-               (window-parameters . ((no-other-window . t)
-                                     (no-delete-other-windows . t)))))
-(setq org-roam-mode-section-functions
-      (list #'org-roam-backlinks-section
-            #'org-roam-reflinks-section
-            #'org-roam-unlinked-references-section
-            ))
-#+END_SRC
-
-** Roam UI
-#+BEGIN_SRC emacs-lisp
-
-;;(add-to-list 'load-path "~/.emacs.d/private/org-roam-ui")
-;;(load-library "org-roam-ui")
-
-(global-set-key (kbd "C-c n u") 'org-roam-ui-open)
-(global-set-key (kbd "C-c n z") 'org-roam-ui-node-zoom)
-(global-set-key (kbd "C-c n n") 'org-roam-ui-node-local)
-
-#+END_SRC
-
 
 ** Prettify
 
@@ -1005,6 +1013,16 @@ writing. Just use a different key for this! (C-c n w)
      1 'org-checkbox-done-text prepend))
   'append)
  #+END_SRC
+** Keybindings
+#+BEGIN_SRC emacs-lisp
+;; Org Mode
+(global-set-key (kbd "C-c c") 'org-capture)
+(global-set-key (kbd "C-c a") 'org-agenda)
+(global-set-key (kbd "C-c t") 'hs/org-schedule-today)
+(global-set-key (kbd "C-c i") 'org-clock-in)
+(global-set-key (kbd "C-c o") 'org-clock-out)
+
+#+END_SRC
 
 * Pomodoro
 
@@ -1027,11 +1045,13 @@ pomodoro timer.
 		       )
   (run-at-time  (concat (number-to-string mins) "min") nil 'org-clock-out)
   )
+
+(global-set-key (kbd "C-c p") 'hs/pomodoro)
 #+END_SRC
 
 * Keybindings
 
-** Generic Bindings
+** Misc Bindings
 
 #+BEGIN_SRC emacs-lisp
 ;; HS minor mode
@@ -1049,17 +1069,9 @@ pomodoro timer.
 (global-set-key (kbd "C-c / *") 'comment-region)
 (global-set-key (kbd "C-c * /") 'uncomment-region)
 
-;; Org Mode
-(global-set-key (kbd "C-c c") 'org-capture)
-(global-set-key (kbd "C-c a") 'org-agenda)
-(global-set-key (kbd "C-c t") 'hs/org-schedule-today)
-(global-set-key (kbd "C-c i") 'org-clock-in)
-(global-set-key (kbd "C-c o") 'org-clock-out)
-
 ;; ibuffer
 (global-set-key (kbd "C-x C-b") 'ibuffer)
 
-(global-set-key (kbd "C-c p") 'hs/pomodoro)
 #+END_SRC
 
 ** Simplified Bindings for Org Mode
