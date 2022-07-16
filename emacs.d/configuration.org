@@ -1,12 +1,9 @@
+PROPERTIES:
+:ID:       7DD192D8-DA31-44C2-9290-6C9CEFF5EAEE
+:END:
 #+TITLE: Emacs Configuration
 #+AUTHOR: Harshad Shirwadkar
 #+FILETAGS: config agenda
-
-* Emacs Configuration                                         :project:
-  :PROPERTIES:
-  :ID:       7DD192D8-DA31-44C2-9290-6C9CEFF5EAEE
-  :END:
-  This is a [[id:07C51469-8108-475E-8A86-385AE8F3A94B][project]] itself.
 
 * Emacs Debugging
   Turn this on if there's a need to debug emacs
@@ -14,83 +11,6 @@
 ;;(setq debug-on-error 't)
 #+END_SRC
 
-
-* Library Functions
-  
-  This section captures all the library functions that are defined in
-  my config.
-
-** Capture Frame function
-
-#+BEGIN_SRC emacs-lisp
-(defun make-capture-frame ()
-  "Create a new frame and run org-capture."
-  (interactive)
-  (make-frame '((name . "capture")))
-  (select-frame-by-name "capture")
-  (delete-other-windows)
-  (org-capture)
-  (delete-other-windows)
-  )
-#+END_SRC
-
-** C Indentation functions
-
-#+BEGIN_SRC emacs-lisp
-(defun hs/c-indent/config-indent-80andNoTrail()
-  (setq whitespace-line-column 80) ;; limit line length
-  (setq whitespace-style '(face lines-tail))
-  (add-hook 'prog-mode-hook 'whitespace-mode)
-  (setq show-trailing-whitespace t)
-  )
-
-(defun hs/c-indent/config-indent-linux()
-  (setq c-default-style "linux")
-  ;; Use TABs of length of 8
-  (setq indent-tabs-mode 1
-	tab-width 8
-	c-basic-offset 8)
-  )
-#+END_SRC
-
-** Org Mode Functions
-
-#+BEGIN_SRC emacs-lisp
-(defun hs/org-goto-journal ()
-  "Create an Org file with current time as name."
-  (interactive)
-  (find-file (format-time-string "~/pkm/journal/journal-%Y-%m.org")))
-
-(defun hs/org-schedule-today ()
-  "Schedule the current task to today."
-  (interactive)
-  (org-agenda-schedule 'nil (current-time)))
-
-(defun hs/org-style-header (arg)
-  "Stylize the header for org agenda."
-  (concat
-   (make-string (+ 2 (length arg)) ?=)
-   "\n " arg " \n"
-   (make-string (+ 2 (length arg)) ?=)
-   "\n")
-  )
-
-(defun hs/org-style-sub-header (arg)
-  "Stylize the header for org agenda."
-  (concat "\n** " arg " **\n")
-  )
-
-(defun hs/org-roamify()
-  (interactive)
-  (org-id-get-create)
-  )
-
-(defun hs/org-roam-enable-ui()
-  (interactive)
-  (org-roam-ui-mode)
-  )
-
-#+END_SRC
 
 * User Information
 #+BEGIN_SRC emacs-lisp
@@ -124,6 +44,7 @@
 		      ido-vertical-mode
 		      org-mime
 		      doom-themes
+		      doom-modeline
 		      use-package
 		      websocket
 		      simple-httpd
@@ -132,19 +53,24 @@
 		      org-ql
 		      org-download
 		      poet-theme
+		      hyperbole
+		      deadgrep
 		      )
     )
 
-  ;; I have disabled this automatic loading of org-roam from melpa for
-  ;; some reason enabling org-roam using use-package (or melpa) is
-  ;; resulting in org-roam-ui complaining that i'm using old version of
-  ;; org-roam. After a bit of debugging, I found that it's some symbol
-  ;; called org citations or something (search for citations in
-  ;; org-roam-db.el file) was missing in my org-roam-db.el. So for now,
-  ;; I am including org-roam directly from git in my private packages
-  ;; folder. Until that gets resolved, this mode of enabling roam is
-  ;; disabled.
+  #+END_SRC
 
+*** Manual loading of Org Roam
+I have disabled this automatic loading of org-roam from melpa for some
+reason enabling org-roam using use-package (or melpa) is resulting in
+org-roam-ui complaining that i'm using old version of org-roam. After
+a bit of debugging, I found that it's some symbol called org citations
+or something (search for citations in org-roam-db.el file) was missing
+in my org-roam-db.el. So for now, I am including org-roam directly
+from git in my private packages folder. Until that gets resolved, this
+mode of enabling roam is disabled.
+
+#+BEGIN_SRC elisp
   (add-to-list 'load-path "~/.emacs.d/private/org-roam/")
   (add-to-list 'load-path "~/.emacs.d/private/org-roam/extensions/")
   (setq org-roam-v2-ack t)
@@ -164,8 +90,6 @@
       (package-install p)))
 
   (setq create-lockfiles nil)
-
-
 #+END_SRC
 ** Google Internal Packages
 #+BEGIN_SRC emacs-lisp
@@ -192,7 +116,7 @@
 	   ;; (load-theme 'adwaita t)
 	   ;; (load-theme 'wombat t))
 	   (load-theme 'doom-nord-light t)
-	   (load-theme 'wombat t))
+	   (load-theme 'doom-molokai t))
      (load-theme 'doom-molokai t)
      )
    #+END_SRC
@@ -205,7 +129,21 @@
 * C Indentation
 #+BEGIN_SRC emacs-lisp
 
-;;; C indentation start ---------------
+(defun hs/c-indent/config-indent-80andNoTrail()
+  (setq whitespace-line-column 80) ;; limit line length
+  (setq whitespace-style '(face lines-tail))
+  (add-hook 'prog-mode-hook 'whitespace-mode)
+  (setq show-trailing-whitespace t)
+  )
+
+(defun hs/c-indent/config-indent-linux()
+  (setq c-default-style "linux")
+  ;; Use TABs of length of 8
+  (setq indent-tabs-mode 1
+	tab-width 8
+	c-basic-offset 8)
+  )
+
 (add-hook 'c-mode-hook 'hs/c-indent/config-indent-linux)
 (add-hook 'c-mode-common-hook 'hs/c-indent/config-indent-80andNoTrail)
 (if (file-directory-p "/google/")
@@ -260,10 +198,24 @@
 
 ;; Disable status and header lines for cleaner appearance
 (setq-default header-line-format nil)
-(setq-default mode-line-format nil)
+; (setq-default mode-line-format nil)
+
+; (doom-modeline-mode 1)
+
 
 ;; Disabel Fringes
 (set-fringe-style 0)
+#+END_SRC
+
+* Mode line
+#+BEGIN_SRC emacs-lisp
+(setq-default mode-line-format (list "%e"
+        mode-line-front-space mode-line-mule-info mode-line-client
+        mode-line-modified mode-line-remote
+        mode-line-frame-identification mode-line-buffer-identification
+        " " mode-line-position  " " 
+        mode-line-misc-info mode-line-end-spaces ))
+
 #+END_SRC
 
 * [[https://www.emacswiki.org/emacs/WinnerMode][Winner Mode]]
@@ -472,6 +424,61 @@
 
 * Org Mode Config
 
+** Library
+#+BEGIN_SRC emacs-lisp
+
+(defun hs/org-goto-journal ()
+  "Create an Org file with current time as name."
+  (interactive)
+  (find-file (format-time-string "~/pkm/journal/journal-%Y-%m.org")))
+
+(defun hs/org-schedule-today ()
+  "Schedule the current task to today."
+  (interactive)
+  (org-agenda-schedule 'nil (current-time)))
+
+(defun hs/org-style-header (arg)
+  "Stylize the header for org agenda."
+  (concat
+   (make-string (+ 2 (length arg)) ?=)
+   "\n " arg " \n"
+   (make-string (+ 2 (length arg)) ?=)
+   "\n")
+  )
+
+(defun hs/org-style-sub-header (arg)
+  "Stylize the header for org agenda."
+  (concat "\n** " arg " **\n")
+  )
+
+(defun hs/org-roamify()
+  (interactive)
+  (org-id-get-create)
+  )
+
+(defun hs/org-roam-enable-ui()
+  (interactive)
+  (org-roam-ui-mode)
+  )
+
+(defun org-generic-shortlinks-open (url)
+  "Open generic shortlinks"
+  (browse-url (concat "http://" url)))
+
+(defun org-harshad-shortlinks-open (url)
+  "Open the google link"
+  (browse-url (concat "http://go.harshad.me/" url)))
+
+(defun org-b-click (action)
+  "Perform a specific action"
+  (if (string= action "click") (org-agenda-filter))
+  )
+
+(defun hs/org-capture-maybe-create-id ()
+  (when (org-capture-get :create-id)
+    (org-id-get-create)))
+#+END_SRC
+
 ** General Config
 #+BEGIN_SRC emacs-lisp
 (require 'org)
@@ -493,7 +500,6 @@
 (setq-default org-download-image-dir "~/pkm/data")
 
 (setq org-use-fast-todo-selection t)
-(setq org-use-speed-commands t)
 
 (setq org-treat-S-cursor-todo-selection-as-state-change nil)
 (setq org-fontify-done-headline t)
@@ -562,6 +568,7 @@
       '("+project/-DONE" ("NEXT" "TODO") ()
         "\\<IGNORE\\>"))
 
+(setq org-use-speed-commands t)
 (setq org-speed-commands-user (quote (("0" . ignore)
                                       ("1" . ignore)
                                       ("2" . ignore)
@@ -609,23 +616,21 @@
                                       ("Z" . ignore)))))
 
 (add-hook 'dired-mode-hook 'org-download-enable)
+(org-babel-do-load-languages 'org-babel-load-languages '((shell . t)))
 #+END_SRC
 
-** Special Links for Google
+** Short Links 
 #+BEGIN_SRC emacs-lisp
-(org-add-link-type "l" 'org-l-open)
-
-(defun org-l-open (url)
-  "Open the google link"
-  (browse-url (concat "http://" url)))
-
+(org-add-link-type "l" 'org-generic-shortlinks-open)
+(org-add-link-type "h" 'org-harshad-shortlinks-open)
+(org-add-link-type "b" 'org-b-click)
 #+END_SRC
 
 ** Logging
-   Logging of entries. On marking entries as done, also record the
-   state change by mmodifying =org-log-note-headings= variable to
-   reflect the state change. This allows such state changes to be
-   tracked in weekly review.
+Logging of entries. On marking entries as done, also record the state
+change by mmodifying =org-log-note-headings= variable to reflect the
+state change. This allows such state changes to be tracked in weekly
+review.
 #+BEGIN_SRC emacs-lisp
 (setq org-log-done (quote note))
 (setq org-log-into-drawer t)
@@ -640,38 +645,33 @@
 ** Keywords like TODO / DONE etc
 
 #+BEGIN_SRC emacs-lisp
-(setq org-todo-keywords
-      (quote ((sequence "TODO(t)" "BLOCKED(b)" "NEXT(n)" "WORKING(w)" "SOMEDAY(s)" "|" "DONE(d)" "CANCELLED(c)" "OBSOLETE(o)" "DONE-IMPORTANT(x)")
-	      )))
+(setq org-todo-keywords (quote ((sequence "TODO(t)" "BLOCKED(b)"
+      "NEXT(n)" "WORKING(w)" "SOMEDAY(s)" "|" "DONE(d)" "CANCELLED(c)"
+      "OBSOLETE(o)" "DONE-IMPORTANT(x)") )))
 
-(setq org-todo-keyword-faces
-      (quote (("TODO" :foreground "red" :weight bold)
-	      ("WORKING" :foreground "cyan" :weight bold)
-	      ("BLOCKED" :foreground "pink" :weight bold)
-              ("NEXT" :foreground "blue" :weight bold)
-              ("DONE" :foreground "forest green" :weight bold)
-              ("DONE" :foreground "yellow" :weight bold)
-	      ("CANCELLED" :foreground "gray" :weight bold)
-	      )))
+(setq org-todo-keyword-faces (quote (("TODO" :foreground "red" :weight
+      bold) ("WORKING" :foreground "cyan" :weight bold) ("BLOCKED"
+      :foreground "pink" :weight bold) ("NEXT" :foreground "blue"
+      :weight bold) ("DONE" :foreground "forest green" :weight bold)
+      ("DONE" :foreground "yellow" :weight bold) ("CANCELLED"
+      :foreground "gray" :weight bold) )))
 
 #+END_SRC
 
 ** Capture Templates
 
 #+BEGIN_SRC emacs-lisp
-;; Capture templates for: TODO tasks, Notes, appointments, meetings, and org-protocol
-(defun hs/org-capture-maybe-create-id ()
-  (when (org-capture-get :create-id)
-    (org-id-get-create)))
 (add-hook 'org-capture-mode-hook #'hs/org-capture-maybe-create-id)
 
 (setq org-capture-templates
-      (quote (("t" "todo" entry (file "~/pkm/inbox.org")
+      (quote (("t" "todo" entry (file "~/pkm/nodes/inbox.org")
                "* TODO %?\n%U\n%a\n")
 	      ("j" "journal" entry (function hs/org-goto-journal)
-               "* %U %?\n")
-	      ("r" "reminder" entry (file "~/pkm/reminders.org")
-               "* TODO %?\nReminder captured on %U.\n(Add a scheduled / deadline date)\n")	      
+               "* Journal entry %U\n<shell-command \"fortune\">\n%?\n")
+	      ("b" "bookmark" entry (file "~/pkm/nodes/inbox.org")
+               "* %? :bookmark:\n%x\n%a\n")
+	      ("r" "reminder" entry (file "~/pkm/nodes/reminders.org")
+               "* TODO %?\nDEADLINE: %(org-insert-time-stamp (org-read-date nil t \"+1d\"))\nDeadline set to tomorrow by default\n")
 	      )))
 
 #+END_SRC
@@ -679,8 +679,8 @@
 ** Refile Settings
 
 #+BEGIN_SRC emacs-lisp
-
 ; Targets include this file and any file contributing to the agenda - up to 9 levels deep
+
 (setq org-refile-targets (quote ((nil :maxlevel . 2)
                                  (org-agenda-files :maxlevel . 2))))
 
@@ -689,12 +689,12 @@
 
 ; Allow refile to create parent tasks with confirmation
 (setq org-refile-allow-creating-parent-nodes (quote confirm))
-
 #+END_SRC
 
 ** Agenda Configuration
 *** Agenda Files Configuration
-**** Default configuration
+**** Default configuration (enabled)
+This makes any files that have a filetag "agenda" a part of agenda.
 #+BEGIN_SRC emacs-lisp
 ;; The buffer you put this code in must have lexical-binding set to t!
 ;; See the final configuration at the end for more details.
@@ -711,25 +711,22 @@
 
 (defun hs/org-roam-refresh-agenda-list ()
   (interactive)
-  (setq org-agenda-files (hs/org-roam-list-notes-by-tag "agenda")))
+  (setq org-agenda-files (hs/org-roam-list-notes-by-tag "agenda"))
+  (add-to-list 'org-agenda-files "~/.emacs.d/configuration.org")	
+  )
 
 ;; Build the agenda list the first time for the session
 (hs/org-roam-refresh-agenda-list)
-
-(add-to-list 'org-agenda-files "~/.emacs.d/configuration.org")
-(add-to-list 'org-agenda-files "~/pkm/nodes/inbox.org")
-(add-to-list 'org-agenda-files "~/pkm/nodes/habits.org")
-(add-to-list 'org-agenda-files "~/pkm/nodes/reminders.org")
-
 #+END_SRC
 
-**** View nodes only configuration
-     THIS CONFIG SHOULD NOT BE ENABLED BY DEFAULT.
+**** All Roam Files are Agenda Files (disabled)
+
+THIS CONFIG SHOULD NOT BE ENABLED BY DEFAULT.
      
-     This is a config that should only be enabled to see if there are
-     any task related items present in nodes/ directory. If such items
-     are present, either move them to inbox.org or move them to
-     appropriate project under pkm/projects.
+This is a config that should only be enabled to see if there are any
+task related items present in nodes/ directory. If such items are
+present, either move them to inbox.org or move them to appropriate
+project under pkm/projects.
 #+BEGIN_SRC comment
 (setq org-agenda-files (directory-files-recursively "~/pkm/" "\.org$"))
 (add-to-list 'org-agenda-files "~/.emacs.d/configuration.org")
@@ -754,6 +751,9 @@
 #+END_SRC
 
 *** Custom Agenda Views
+:PROPERTIES:
+:ORDERED:  t
+:END:
 
 #+BEGIN_SRC emacs-lisp
 (org-super-agenda-mode)
@@ -775,76 +775,48 @@
     (let (
 	  (scheduled (org-get-scheduled-time (point)))
 	  (deadline (org-get-deadline-time (point))))
-      (if scheduled (format-time-string "%d %b %Y" scheduled)
-	(if deadline (format-time-string "%d %b %Y" deadline) "<sub>"))
+      (if scheduled (format-time-string "📝 %m/%d:" scheduled)
+	(if deadline (format-time-string "🛑 %m/%d:" deadline) ""))
       )
     )
 
 (setq org-agenda-custom-commands
-      '(("o" "Overview"
+      '(("d" "Tasks Dashboard"
 	 (
 	  (alltodo "" (
-		       (org-agenda-overriding-header (hs/org-style-header "Overview"))
+		       (org-agenda-overriding-header (hs/org-style-header "Tasks Dashboard"))
+		       (org-agenda-prefix-format '((todo . "%-8.8c.. %-10(hs/org-get-scheduled-or-deadline)   ")))
 		       (org-super-agenda-groups '(
-						  (:name "** Unprocessed **\n" :and (:scheduled nil :deadline nil))
-						  (:name "** Working **\n" :todo "WORKING")
-						  (:name "** Next **\n" :todo "NEXT")
-						  (:name "** Blocked **\n" :todo "BLOCKED")
-						  (:name "** Someday **\n" :todo "SOMEDAY")
+						  (:name "** Urgent **\n"
+							 :and (:tag "urgent")
+							 :face (:underline t :foreground "Red" :bold t))
+						  (:name "** Active **\n"
+							 :todo "WORKING"
+							 :face (:foreground "peru"))
+						  (:name "** Today! **\n"
+							 :scheduled today
+							 :deadline today
+							 :face (:foreground "light sea green"))
+						  (:name "** Next **\n"
+							 :todo "NEXT")
+						  (:name "** Upcoming! **\n"
+							 :scheduled future
+							 :deadline future
+							 :face (:foreground "light sea green"))
+						  (:name "** Blocked **\n"
+							 :todo "BLOCKED")
+						  (:name "** Someday **\n"
+							 :todo "SOMEDAY"
+							 :order 100)
+						  (:name "** Backlog **\n"
+							 :and (:scheduled nil :deadline nil)
+							 :order 90)
 						  (:discard (:anything t))
 						  ))
 		       )
 		   )
-	  (alltodo "" (
-		       (org-agenda-overriding-header "")
-		       (org-agenda-prefix-format " %-20(hs/org-get-scheduled-or-deadline)  ")
-		       (org-super-agenda-groups '(
-						  (:name "** Habits **\n" :habit t)
-						  (:name "** Scheduled **\n" :scheduled t)
-						  (:discard (:anything t))
-						  ))
-		       )
-		   )
-	  (alltodo "" (
-		       (org-agenda-overriding-header "")
-		       (org-agenda-prefix-format " %-20(hs/org-get-scheduled-or-deadline)  ")
-		       (org-super-agenda-groups '(
-						  (:name "** Deadlines **\n" :deadline t)
-						  (:discard (:anything t))
-						  ))
-		       )
-		   )
-	  )
 	 )
-	("d" "Detailed Agenda View"
-	 (
-	  (agenda "" (
-		      (org-agenda-overriding-header (hs/org-style-header "Detailed Agenda View"))
-		      (org-super-agenda-groups '(
-						 (:name "Habits" :habit t)
-						 (:name "Today" :time-grid t :scheduled today :date today)
-						 (:name "Overdue" :scheduled past)
-						 (:name "Upcoming" :scheduled future :deadline future)
-						 )
-					       )
-		      )
-		  )
-	  (alltodo "" (
-		       (org-agenda-overriding-header (hs/org-style-sub-header "Task Groups"))
-		       (org-agenda-prefix-format " %-20(hs/org-get-scheduled-or-deadline)  ")
-		       (org-super-agenda-groups '(
-						  (:name "Scheduled >\n" :scheduled t)
-						  (:name "Deadlines >\n" :deadline t)
-						  (:name "Working >\n" :todo "WORKING")
-						  (:name "Next >\n" :todo "NEXT")
-						  (:name "Blocked >\n" :todo "BLOCKED")
-						  (:name "Someday >\n" :todo "SOMEDAY")
-						  (:name "Unprocessed TODOs >\n" :todo "TODO")
-						  ))
-		       )
-		   )
-	  )
-	 )	
+	 )
 	)
       )
 #+END_SRC
@@ -914,11 +886,16 @@
 (setq org-alphabetical-lists t)
 #+END_SRC
 
+** Deft
+#+BEGIN_SRC emacs-lisp
+(global-set-key (kbd "C-c d") #'deadgrep)
+#+END_SRC
+
 ** Roam
 
 #+BEGIN_SRC emacs-lisp    
 (setq org-roam-directory (file-truename "~/pkm/"))
-(setq org-roam-dailies-directory "snippets")
+(setq org-roam-dailies-directory "weekly")
 (setq org-roam-graph-executable "/usr/local/bin/dot")
 
 (setq org-roam-dailies-capture-templates
@@ -929,23 +906,12 @@
 
 (setq org-roam-capture-templates
       '(
-	("w" "work" plain "%?"
-	 :if-new (file+head "~/pkm/nodes/work/${slug}.org"
-                            "#+title: ${title}\n#+timestamp: %T\n#+filetags: work\n")
-	 :unnarrowed t :immediate-finish t)
 	("p" "personal" plain "%?"
 	 :if-new (file+head "~/pkm/nodes/personal/${slug}.org"
                             "#+title: ${title}\n#+timestamp: %T\n#+filetags: personal\n")
 	 :unnarrowed t :immediate-finish t)
-	("x" "work/project" plain "%?"
-	 :if-new (file+head "~/pkm/work/projects/${slug}.org"
-                            "#+title: ${title}\n#+timestamp: %T\n#+filetags: work project agenda\n")
-	 :unnarrowed t :immediate-finish t)
-	("y" "personal/project" plain "%?"
-	 :if-new (file+head "~/pkm/personal/projects/${slug}.org"
-                            "#+title: ${title}\n#+timestamp: %T\n#+filetags: personal project agenda\n")
-	 :unnarrowed t :immediate-finish t)
-      ))
+      )
+      )
 
 (global-set-key (kbd "C-c n l") 'org-roam-buffer-toggle)
 (global-set-key (kbd "C-c n f") 'org-roam-node-find)
@@ -965,6 +931,29 @@
 ;; Use helm package for org-roam completions, these are awesome!
 (use-package helm :ensure t :config (helm-mode))
 #+END_SRC
+
+*** Quick Insert Work Nodes
+
+As opposed to =org-roam-node-insert=, this function allows you to
+insert a "work" node immediately without you having to break your
+writing. Just use a different key for this! (C-c n w)
+
+#+BEGIN_SRC emacs-lisp
+(defun hs/org-roam-node-insert-work ()
+  (interactive)
+  (org-roam-node-insert
+   (lambda (node)
+     (member "work" (org-roam-node-tags node)))
+   :templates
+   '(("w" "work" plain "%?"
+      :if-new (file+head "~/pkm/nodes/work/${slug}.org"
+                         "#+title: ${title}\n#+timestamp: %T\n#+filetags: work\n")
+      :unnarrowed t :immediate-finish t))))
+
+(global-set-key (kbd "C-c n w") 'hs/org-roam-node-insert-work)
+
+#+END_SRC
+
 
 ** Roam buffer
 #+BEGIN_SRC emacs-lisp
@@ -1017,6 +1006,29 @@
   'append)
  #+END_SRC
 
+* Pomodoro
+
+This is a simple library function that starts a pomodoro timer and
+automatically clocks in the current task. So the expected usage of
+this function is to put cursor on the current task and start a
+pomodoro timer.
+#+BEGIN_SRC emacs-lisp
+(defun hs/pomodoro (mins)
+  (interactive (list (read-number "Pomodoro Focus Time (mins): " 25)))
+  (if (string= (buffer-name) "*Org Agenda*")
+      (org-agenda-clock-in)
+      (org-clock-in))
+  (org-timer-set-timer (concat
+			(number-to-string (/ mins 60))
+			":"
+			(number-to-string (% mins 60))
+			":00"
+			)
+		       )
+  (run-at-time  (concat (number-to-string mins) "min") nil 'org-clock-out)
+  )
+#+END_SRC
+
 * Keybindings
 
 ** Generic Bindings
@@ -1047,6 +1059,7 @@
 ;; ibuffer
 (global-set-key (kbd "C-x C-b") 'ibuffer)
 
+(global-set-key (kbd "C-c p") 'hs/pomodoro)
 #+END_SRC
 
 ** Simplified Bindings for Org Mode
@@ -1102,7 +1115,7 @@
 #+END_SRC
 
 * Server Starting
-  ([[https://stackoverflow.com/questions/6397323/how-to-avoid-the-message-of-server-start-while-opening-another-emacs-session][Reference]])
+([[https://stackoverflow.com/questions/6397323/how-to-avoid-the-message-of-server-start-while-opening-another-emacs-session][Reference]])
 
 #+BEGIN_SRC emacs-lisp
 (require 'server)
