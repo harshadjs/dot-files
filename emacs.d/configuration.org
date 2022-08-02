@@ -1,4 +1,4 @@
-PROPERTIES:
+:PROPERTIES:
 :ID:       7DD192D8-DA31-44C2-9290-6C9CEFF5EAEE
 :END:
 #+TITLE: Emacs Configuration
@@ -8,7 +8,7 @@ PROPERTIES:
 * Emacs Debugging
   Turn this on if there's a need to debug emacs
 #+BEGIN_SRC emacs-lisp
-;;(setq debug-on-error 't)
+(setq debug-on-error 't)
 #+END_SRC
 
 
@@ -118,7 +118,7 @@ reference.
        (if (file-exists-p "~/.emacs-light")
 	   ;; (load-theme 'adwaita t)
 	   ;; (load-theme 'wombat t))
-	   (load-theme 'doom-nord-light t)
+	   (load-theme 'doom-one-light t)
 	   (load-theme 'doom-molokai t))
      (load-theme 'doom-molokai t)
      )
@@ -464,9 +464,6 @@ reference.
   (org-roam-ui-mode)
   )
 
-(defun hs/org-capture-maybe-create-id ()
-  (when (org-capture-get :create-id)
-    (org-id-get-create)))
 #+END_SRC
 
 ** General Config
@@ -494,11 +491,11 @@ reference.
 (setq org-treat-S-cursor-todo-selection-as-state-change nil)
 (setq org-fontify-done-headline t)
 
-; Set default column view headings: Task Effort Clock_Summary
+					; Set default column view headings: Task Effort Clock_Summary
 (setq org-columns-default-format "%80ITEM(Task) %10Effort(Effort){:} %10CLOCKSUM")
 
-; global Effort estimate values
-; global STYLE property values for completion
+					; global Effort estimate values
+					; global STYLE property values for completion
 (setq org-global-properties (quote (("Effort_ALL" . "0:15 0:30 0:45 1:00 2:00 3:00 4:00 5:00 6:00 0:00")
                                     ("STYLE_ALL" . "habit"))))
 (setq org-enforce-todo-dependencies t)
@@ -512,16 +509,15 @@ reference.
 (setq org-yank-adjusted-subtrees t)
 (setq org-id-method (quote uuidgen))
 (setq org-deadline-warning-days 30)
-(setq org-schedule-warning-days 30)
 
-; Use the current window for C-c ' source editing
+					; Use the current window for C-c ' source editing
 (setq org-src-window-setup 'current-window)
 
-; Targets complete directly with IDO
+					; Targets complete directly with IDO
 (setq org-outline-path-complete-in-steps nil)
 
 ;;(setq org-completion-use-ido t)
-; Use the current window for indirect buffer display
+					; Use the current window for indirect buffer display
 (setq org-indirect-buffer-display 'current-window)
 
 (setq org-return-follows-link t)
@@ -531,7 +527,7 @@ reference.
 (setq org-agenda-skip-additional-timestamps-same-entry t)
 (setq org-table-use-standard-references (quote from))
 
-; Overwrite the current window with the agenda
+					; Overwrite the current window with the agenda
 (setq org-agenda-window-setup 'current-window)
 (setq org-clone-delete-id t)
 (setq org-cycle-include-plain-lists t)
@@ -559,54 +555,65 @@ reference.
         "\\<IGNORE\\>"))
 
 (setq org-use-speed-commands t)
-(setq org-speed-commands-user (quote (("0" . ignore)
-                                      ("1" . ignore)
-                                      ("2" . ignore)
-                                      ("3" . ignore)
-                                      ("4" . ignore)
-                                      ("5" . ignore)
-                                      ("6" . ignore)
-                                      ("7" . ignore)
-                                      ("8" . ignore)
-                                      ("9" . ignore)
+(setq org-speed-commands (quote (("0" . ignore)
+                                 ("1" . ignore)
+                                 ("2" . ignore)
+                                 ("3" . ignore)
+                                 ("4" . ignore)
+                                 ("5" . ignore)
+                                 ("6" . ignore)
+                                 ("7" . ignore)
+                                 ("8" . ignore)
+                                 ("9" . ignore)
 
-                                      ("a" . ignore)
-                                      ("d" . ignore)
-                                      ("i" progn
-                                       (forward-char 1)
-                                       (call-interactively 'org-insert-heading-respect-content)
+                                 ("a" . ignore)
+                                 ("d" . ignore)
+                                 ("i" progn
+                                  (forward-char 1)
+                                  (call-interactively 'org-insert-heading-respect-content)
 
-                                      ("k" . org-kill-note-or-show-branches)
-                                      ("l" . ignore)
-                                      ("m" . ignore)
-                                      ("r" . ignore)
-                                      ("s" . org-save-all-org-buffers)
-                                      ("w" . org-refile)
-                                      ("x" . hs/org-schedule-today)
-                                      ("y" . ignore)
-                                      ("z" . org-add-note)
+                                  ("k" . org-kill-note-or-show-branches)
+                                  ("l" . ignore)
+                                  ("m" . ignore)
+                                  ("r" . ignore)
+                                  ("s" . org-save-all-org-buffers)
+                                  ("w" . org-refile)
+                                  ("x" . hs/org-schedule-today)
+                                  ("y" . ignore)
+                                  ("z" . org-add-note)
 
-                                      ("A" . ignore)
-                                      ("B" . ignore)
-                                      ("E" . ignore)
-                                      ("G" . ignore)
-                                      ("H" . ignore)
-                                      ("J" . org-clock-goto)
-                                      ("K" . ignore)
-                                      ("L" . ignore)
-                                      ("M" . ignore)
-                                      ("N" . org-narrow-to-subtree)
-                                      ("Q" . ignore)
-                                      ("R" . ignore)
-                                      ("S" . ignore)
-                                      ("V" . ignore)
-                                      ("W" . widen)
-                                      ("X" . ignore)
-                                      ("Y" . ignore)
-                                      ("Z" . ignore)))))
+                                  ("A" . ignore)
+                                  ("B" . ignore)
+                                  ("E" . ignore)
+                                  ("G" . ignore)
+                                  ("H" . ignore)
+                                  ("J" . org-clock-goto)
+                                  ("K" . ignore)
+                                  ("L" . ignore)
+                                  ("M" . ignore)
+                                  ("N" . org-narrow-to-subtree)
+                                  ("Q" . ignore)
+                                  ("R" . ignore)
+                                  ("S" . ignore)
+                                  ("V" . ignore)
+                                  ("W" . widen)
+                                  ("X" . ignore)
+                                  ("Y" . ignore)
+                                  ("Z" . ignore)))))
 
 (add-hook 'dired-mode-hook 'org-download-enable)
 (org-babel-do-load-languages 'org-babel-load-languages '((shell . t)))
+#+END_SRC
+
+** Org crypt
+#+BEGIN_SRC emacs-lisp
+(require 'org-crypt)
+(org-crypt-use-before-save-magic)
+(setq org-crypt-key nil)
+;; GPG key to use for encryption
+;; Either the Key ID or set to nil to use symmetric encryption.
+
+(setq auto-save-default nil)
 #+END_SRC
 
 ** Short Links 
@@ -631,10 +638,12 @@ reference.
 #+END_SRC
 
 ** Logging
+
 Logging of entries. On marking entries as done, also record the state
 change by mmodifying =org-log-note-headings= variable to reflect the
 state change. This allows such state changes to be tracked in weekly
 review.
+
 #+BEGIN_SRC emacs-lisp
 (setq org-log-done (quote note))
 (setq org-log-into-drawer t)
@@ -642,11 +651,12 @@ review.
 #+END_SRC
 
 ** Tags excluded from inheritance
+
 #+BEGIN_SRC emacs-lisp
-(setq org-tags-exclude-from-inheritance '("travel" "project"))
+(setq org-tags-exclude-from-inheritance '("travel" "project" "crypt"))
 #+END_SRC
 
-** Keywords like TODO / DONE etc
+** "TODO" Keywords
 
 #+BEGIN_SRC emacs-lisp
 (setq org-todo-keywords (quote ((sequence "TODO(t)" "BLOCKED(b)"
@@ -665,16 +675,20 @@ review.
 ** Capture Templates
 
 #+BEGIN_SRC emacs-lisp
+(defun hs/org-capture-maybe-create-id ()
+  (when (org-capture-get :create-id)
+    (org-id-get-create)))
+
 (add-hook 'org-capture-mode-hook #'hs/org-capture-maybe-create-id)
 
 (setq org-capture-templates
-      (quote (("t" "todo" entry (file "~/pkm/nodes/inbox.org")
+      (quote (("t" "todo" entry (file "~/pkm/inbox.org")
                "* TODO %?\n%U\n%a\n")
 	      ("j" "journal" entry (function hs/org-goto-journal)
                "* Journal entry %U\n<shell-command \"fortune\">\n%?\n")
-	      ("b" "bookmark" entry (file "~/pkm/nodes/inbox.org")
+	      ("b" "bookmark" entry (file "~/pkm/inbox.org")
                "* %? :bookmark:\n%x\n%a\n")
-	      ("r" "reminder" entry (file "~/pkm/nodes/reminders.org")
+	      ("r" "reminder" entry (file "~/pkm/reminders.org")
                "* TODO %?\nDEADLINE: %(org-insert-time-stamp (org-read-date nil t \"+1d\"))\nDeadline set to tomorrow by default\n")
 	      )))
 
@@ -683,15 +697,19 @@ review.
 ** Refile Settings
 
 #+BEGIN_SRC emacs-lisp
-; Targets include this file and any file contributing to the agenda - up to 9 levels deep
+;; Targets include this file and any file contributing to the agenda -
+;; up to 9 levels deep
 
-(setq org-refile-targets (quote ((nil :maxlevel . 2)
-                                 (org-agenda-files :maxlevel . 2))))
+(setq org-refile-targets (quote ((nil :maxlevel . 2) (org-agenda-files
+                                 :maxlevel . 2))))
 
-; Use full outline paths for refile targets - we file directly with IDO
+;; Use full outline paths for refile targets - we file directly with
+;; IDO
+
 (setq org-refile-use-outline-path 'file)
 
-; Allow refile to create parent tasks with confirmation
+;; Allow refile to create parent tasks with confirmation
+
 (setq org-refile-allow-creating-parent-nodes (quote confirm))
 #+END_SRC
 
@@ -714,10 +732,9 @@ review.
 (setq org-roam-capture-templates
       '(
 	("p" "personal" plain "%?"
-	 :if-new (file+head "~/pkm/nodes/personal/${slug}.org"
+	 :if-new (file+head "~/pkm/nodes/${slug}.org"
                             "#+title: ${title}\n#+timestamp: %T\n#+filetags: personal\n")
-	 :unnarrowed t :immediate-finish t)
-	)
+	 :unnarrowed t :immediate-finish t))
       )
 
 (global-set-key (kbd "C-c n l") 'org-roam-buffer-toggle)
@@ -725,6 +742,7 @@ review.
 (global-set-key (kbd "C-c n i") 'org-roam-node-insert)
 (global-set-key (kbd "C-c n c") 'org-roam-capture)
 (global-set-key (kbd "C-c n s") 'org-roam-db-sync)
+(global-set-key (kbd "C-c n m") 'org-roam-node-random)
 
 (global-set-key (kbd "C-c n t") 'org-roam-dailies-goto-today)
 (global-set-key (kbd "C-c n d") 'org-roam-dailies-goto-date)
@@ -753,7 +771,7 @@ writing. Just use a different key for this! (C-c n w)
      (member "work" (org-roam-node-tags node)))
    :templates
    '(("w" "work" plain "%?"
-      :if-new (file+head "~/pkm/nodes/work/${slug}.org"
+      :if-new (file+head "~/pkm/nodes/${slug}.org"
                          "#+title: ${title}\n#+timestamp: %T\n#+filetags: work\n")
       :unnarrowed t :immediate-finish t))))
 
@@ -814,11 +832,11 @@ This makes any files that have a filetag "agenda" a part of agenda.
 (defun hs/org-roam-refresh-agenda-list ()
   (interactive)
   (setq org-agenda-files (hs/org-roam-list-notes-by-tag "agenda"))
-  (add-to-list 'org-agenda-files "~/.emacs.d/configuration.org")	
+  (add-to-list 'org-agenda-files "~/.emacs.d/configuration.org")
+  (delete-dups org-agenda-files)
   )
 
 ;; Build the agenda list the first time for the session
-(hs/org-roam-refresh-agenda-list)
 #+END_SRC
 
 **** All Roam Files are Agenda Files (disabled)
@@ -858,6 +876,30 @@ project under pkm/projects.
 :END:
 
 #+BEGIN_SRC emacs-lisp
+(defun hs/org-get-scheduled-or-deadline ()
+  (let (
+	(tags (org-get-tags (point)))
+	(birthday (member "birthday" (org-get-tags (point))))
+	(home (member "home" (org-get-tags (point))))
+	(scheduled (org-get-scheduled-time (point)))
+	(deadline (org-get-deadline-time (point)))
+	)
+    (if (member "birthday" tags) (setq prefix "🎂")
+      (if (member "home" tags) (setq prefix "🏠")
+	(if (member "urgent" tags) (setq prefix "🚨")
+	  (if scheduled (setq prefix "📅")
+	    (if deadline (setq prefix "⏰")
+	      (setq prefix ""))))))
+
+    (if scheduled
+	(concat prefix (format-time-string " %m/%d:" scheduled))
+      (concat prefix (format-time-string " %m/%d:" deadline))
+      )
+
+    )
+  )
+
+
 (org-super-agenda-mode)
 
 (setq org-agenda-block-separator nil)
@@ -865,33 +907,40 @@ project under pkm/projects.
 (setq org-habit-show-habits t)
 (setq org-habit-graph-column 50)
 (setq org-habit-show-all-today t)
+(setq org-agenda-prefix-format
+      '(
+	(agenda . "%-8.8c.. %-12t %-10(hs/org-get-scheduled-or-deadline)   ")
+	(todo . "%-8.8c.. %-10(hs/org-get-scheduled-or-deadline)   ")
+	))
 (setq org-super-agenda-groups '(
-				(:name "Habits" :habit t)
-				(:name "Today" :time-grid t :scheduled today :date today)
-				(:name "Overdue" :scheduled past)
-				(:name "Upcoming" :scheduled future :deadline future)
-				)
+ 				(:name "Habits" :habit t)
+ 				(:name "Today" :time-grid t :scheduled today :date today)
+ 				(:name "Overdue" :scheduled past :deadline past)
+ 				(:name "Upcoming" :scheduled future :deadline future)
+ 				)
       )
 
-(defun hs/org-get-scheduled-or-deadline ()
-    (let (
-	  (scheduled (org-get-scheduled-time (point)))
-	  (deadline (org-get-deadline-time (point))))
-      (if scheduled (format-time-string "📝 %m/%d:" scheduled)
-	(if deadline (format-time-string "🛑 %m/%d:" deadline) ""))
-      )
-    )
+(setq org-agenda-include-diary t)
+
 
 (setq org-agenda-custom-commands
-      '(("d" "Tasks Dashboard"
+      '(
+	("d" "Dashboard"
 	 (
 	  (alltodo "" (
 		       (org-agenda-overriding-header (hs/org-style-header "Tasks Dashboard"))
 		       (org-agenda-prefix-format '((todo . "%-8.8c.. %-10(hs/org-get-scheduled-or-deadline)   ")))
 		       (org-super-agenda-groups '(
+						  (:name "** Habits **\n" :habit t)
 						  (:name "** Urgent **\n"
 							 :and (:tag "urgent")
-							 :face (:underline t :foreground "Red" :bold t))
+							 :face (:underline t :foreground "Red" :bold t)
+							 )
+						  (:name "** Overdue **\n"
+							 :scheduled past
+							 :deadline past
+							 :face (:underline t :foreground "Red" :bold t)
+							 )
 						  (:name "** Active **\n"
 							 :todo "WORKING"
 							 :face (:foreground "peru"))
@@ -899,12 +948,14 @@ project under pkm/projects.
 							 :scheduled today
 							 :deadline today
 							 :face (:foreground "light sea green"))
+						  (:name "** Upcoming! **\n"
+							 :and (:scheduled future
+									  :not (:tag "birthday"))
+							 :and (:deadline future
+									 :not (:tag "birthday"))
+							 :face (:foreground "light sea green"))
 						  (:name "** Next **\n"
 							 :todo "NEXT")
-						  (:name "** Upcoming! **\n"
-							 :scheduled future
-							 :deadline future
-							 :face (:foreground "light sea green"))
 						  (:name "** Blocked **\n"
 							 :todo "BLOCKED")
 						  (:name "** Someday **\n"
@@ -917,10 +968,11 @@ project under pkm/projects.
 						  ))
 		       )
 		   )
-	 )
+	  )
 	 )
 	)
       )
+
 #+END_SRC
 
 ** Clocking
@@ -1013,6 +1065,15 @@ project under pkm/projects.
      1 'org-checkbox-done-text prepend))
   'append)
  #+END_SRC
+
+** Highlight Text
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'org-emphasis-alist
+             '("/" (:background "yellow" :foreground "black")
+               ))
+#+END_SRC
+
 ** Keybindings
 #+BEGIN_SRC emacs-lisp
 ;; Org Mode
@@ -1136,3 +1197,13 @@ pomodoro timer.
 #+END_SRC
 
 
+
+
+* Post Config
+
+#+BEGIN_SRC emacs-lisp
+
+(hs/org-roam-refresh-agenda-list)
+(find-file "~/pkm/favorites.org") 
+
+#+END_SRC
